@@ -68,7 +68,7 @@ claude remote-control
 
 **Chat Bot (Telegram/Slack/Discord/WhatsApp):**
 ```bash
-cd opencode-plugin
+cd openanalyst-plugin
 npm install
 cp .env.example .env
 # Add your Postiz API key + channel credentials

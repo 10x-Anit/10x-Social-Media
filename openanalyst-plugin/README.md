@@ -1,4 +1,4 @@
-# 10x Social Media — OpenCode Chat Plugin
+# 10x Social Media — OpenAnalyst Chat Plugin
 
 Chat bot plugin that connects Telegram, Slack, Discord, and WhatsApp
 to the 10x Social Media platform. Team members message the bot to
@@ -7,7 +7,7 @@ create posts, schedule content, and check analytics.
 ## Quick Start
 
 ```bash
-cd opencode-plugin
+cd openanalyst-plugin
 npm install
 cp .env.example .env
 # Edit .env with your Postiz API key + channel credentials

@@ -84,22 +84,22 @@ else
   echo "   [FAIL] .mcp.json not found"
 fi
 
-# 6. Check OpenCode plugin
+# 6. Check OpenAnalyst plugin
 echo ""
-echo "6. OpenCode Plugin"
-if [ -f "$PROJECT_DIR/opencode-plugin/package.json" ]; then
-  if [ -d "$PROJECT_DIR/opencode-plugin/node_modules" ]; then
+echo "6. OpenAnalyst Plugin"
+if [ -f "$PROJECT_DIR/openanalyst-plugin/package.json" ]; then
+  if [ -d "$PROJECT_DIR/openanalyst-plugin/node_modules" ]; then
     echo "   [OK] Plugin installed"
   else
-    echo "   [WARN] Plugin not installed — run: cd opencode-plugin && npm install"
+    echo "   [WARN] Plugin not installed — run: cd openanalyst-plugin && npm install"
   fi
-  if [ -d "$PROJECT_DIR/opencode-plugin/dist" ]; then
+  if [ -d "$PROJECT_DIR/openanalyst-plugin/dist" ]; then
     echo "   [OK] Plugin built"
   else
-    echo "   [WARN] Plugin not built — run: cd opencode-plugin && npm run build"
+    echo "   [WARN] Plugin not built — run: cd openanalyst-plugin && npm run build"
   fi
 else
-  echo "   [WARN] OpenCode plugin not found"
+  echo "   [WARN] OpenAnalyst plugin not found"
 fi
 
 echo ""

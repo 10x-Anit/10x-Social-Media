@@ -1,7 +1,7 @@
 {
-  "name": "@10x-social/opencode-plugin",
+  "name": "@10x-social/openanalyst-plugin",
   "version": "1.0.0",
-  "description": "OpenCode chat-channel plugin for 10x Social Media — Telegram, Slack, Discord, WhatsApp",
+  "description": "OpenAnalyst chat-channel plugin for 10x Social Media — Telegram, Slack, Discord, WhatsApp",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",

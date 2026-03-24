@@ -12,7 +12,7 @@
 │  │                                                       │   │
 │  │  Claude Code ─── terminal (/post, /analytics, etc.)   │   │
 │  │  Claude App ──── mobile (Remote Control)              │   │
-│  │  Chat Bots ───── opencode-plugin/ (TG/Slack/DC/WA)   │   │
+│  │  Chat Bots ───── openanalyst-plugin/ (TG/Slack/DC/WA)   │   │
 │  │  Dashboard ───── browser (localhost:4200)              │   │
 │  └──────────────┬───────────┬──────────────┬────────────┘   │
 │                 │           │              │                 │
@@ -111,7 +111,7 @@ POSTIZ_BASE_URL=                   POSTIZ_BASE_URL=
 docker-compose.yml                 Same docker-compose.yml
   (same file, reads .env)           + Nginx/Caddy reverse proxy with SSL
 
-opencode-plugin/.env               Update POSTIZ_BASE_URL to remote URL
+openanalyst-plugin/.env               Update POSTIZ_BASE_URL to remote URL
   POSTIZ_BASE_URL=localhost  →      POSTIZ_BASE_URL=https://social.yourdomain.com
 
 Skills, commands, templates,       UNCHANGED — they use MCP tools

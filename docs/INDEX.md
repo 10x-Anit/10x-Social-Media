@@ -50,7 +50,7 @@
 | [F:SKILL.06] | .claude/skills/analytics-tracking.md | Per-post time-series tracking system | [F:DATA.01] | [FEAT:ANALYTICS] |
 | [F:SKILL.07] | .claude/skills/onboarding-checks.md | Pre-flight checks before any command | — | ALL |
 | [F:DATA.01] | data/analytics-tracker.json | Persistent per-post analytics store | — | [FEAT:ANALYTICS] |
-| [F:PLUGIN.01] | opencode-plugin/ | OpenCode chat-channel plugin (Telegram/Slack/Discord/WhatsApp) | [V:POSTIZ_API_KEY], [V:POSTIZ_BASE_URL] | [FEAT:POST], [FEAT:ANALYTICS] |
+| [F:PLUGIN.01] | openanalyst-plugin/ | OpenAnalyst chat-channel plugin (Telegram/Slack/Discord/WhatsApp) | [V:POSTIZ_API_KEY], [V:POSTIZ_BASE_URL] | [FEAT:POST], [FEAT:ANALYTICS] |
 | [F:SCRIPT.01] | scripts/validate-index.sh | Check all index references resolve | [F:DOC.01]-[F:DOC.04] | [FEAT:INDEX] |
 | [F:SCRIPT.02] | scripts/sync-channels.sh | Refresh integration IDs from Postiz API | [V:POSTIZ_API_KEY], [V:POSTIZ_BASE_URL] | [FEAT:ANALYTICS] |
 | [F:SCRIPT.03] | scripts/health-check.sh | Verify MCP + env vars + Docker | [F:ROOT.03], [F:ROOT.05], [F:ROOT.06] | ALL |

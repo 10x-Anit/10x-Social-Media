@@ -325,20 +325,20 @@ POSTIZ_API_KEY=<key> POSTIZ_API_URL=http://localhost:4200/api npx -y postiz inte
 ```
 Show connected accounts.
 
-## Phase 6: Install OpenCode Plugin
+## Phase 6: Install OpenAnalyst Plugin
 
 ### 6.1 Install dependencies
 ```bash
-cd opencode-plugin && npm install
+cd openanalyst-plugin && npm install
 ```
 
 ### 6.2 Build
 ```bash
-cd opencode-plugin && npm run build
+cd openanalyst-plugin && npm run build
 ```
 
 ### 6.3 Create plugin .env
-Copy opencode-plugin/.env.example to opencode-plugin/.env.
+Copy openanalyst-plugin/.env.example to openanalyst-plugin/.env.
 Fill in POSTIZ_BASE_URL and POSTIZ_API_KEY from main .env.
 
 ### 6.4 Ask about chat channels
@@ -396,10 +396,10 @@ Scan the QR code with the Claude mobile app.
 ```
 
 ### 9.2 Chat bot
-If OpenCode plugin configured in Phase 6:
+If OpenAnalyst plugin configured in Phase 6:
 ```
 Start the chat bot:
-cd opencode-plugin && npm run dev
+cd openanalyst-plugin && npm run dev
 ```
 
 ## Phase 10: Mark Complete
@@ -415,7 +415,7 @@ postiz_url: {{POSTIZ_BASE_URL}}
 temporal: {{configured or skipped}}
 composio: {{configured or skipped}}
 accounts: {{list of connected platforms}}
-opencode_plugin: {{installed or skipped}}
+openanalyst_plugin: {{installed or skipped}}
 chat_channels: {{list or none}}
 ```
 
