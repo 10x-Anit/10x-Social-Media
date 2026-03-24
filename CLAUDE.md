@@ -1,85 +1,93 @@
-# 10x Social Media — Multi-Platform Management Stack
+# 10x Social Media — Team Social Media Management Platform
 <!-- [F:ROOT.01] Claude Code project instructions -->
 
-## Overview
-AI-powered social media management via Claude Code + Postiz (Docker) + Playwright MCP.
-Supports: LinkedIn, Twitter/X, Facebook, Instagram, TikTok, YouTube, Reddit, Pinterest, Threads, Bluesky, Mastodon, Discord, Dribbble.
+## What This Is
+A team tool where each member connects their own social media accounts and uses
+Claude Code to create, schedule, track, and analyze posts across all platforms.
+No technical knowledge needed — run /setup and follow the prompts.
 
-## Docker Services (docker-compose.yml)
+## CRITICAL: First-Time User Flow
+**Before running ANY command, read `skills/onboarding-checks.md` [F:SKILL.07].**
+If the user hasn't completed setup, guide them through /setup instead of failing.
+Always be helpful. Never show raw errors. Explain what's wrong and how to fix it.
+
+## How It Works
+- **Postiz Dashboard** (`http://localhost:4200`) — Visual UI for calendar, scheduling, account management
+- **Claude Code** (this terminal) — AI-powered posting, analytics, content creation
+- **Both share the same database** — what you create in one shows in the other
+- **Each team member** connects their own accounts and gets their own API key
+
+## Docker Services (3 containers)
 - **Postiz App** → `http://localhost:4200` (dashboard, API, OAuth)
-- **PostgreSQL** → internal :5432 (posts, users, analytics)
-- **Redis** → internal :6379 (cache, queue)
-- **Temporal** → internal :7233 (scheduled tasks)
-- **Temporal UI** → `http://localhost:8080` (workflow monitoring)
+- **PostgreSQL** → internal (posts, users, analytics)
+- **Redis** → internal (cache, queue)
+- **Temporal Cloud** → `prod.ksrs0.tmprl.cloud` (scheduling, retries — managed)
 
-## MCP Servers (registered in .mcp.json, run locally via npx)
-- **postiz**: `npx postiz` (CLI/stdio) — posting, scheduling, per-post analytics
-- **playwright**: `npx @playwright/mcp@latest` — browser automation
-
-## Postiz CLI Commands (available as MCP tools + terminal)
-- `postiz posts:create` — create a post
-- `postiz posts:list` — list all posts
-- `postiz integrations:list` — list connected platforms
-- `postiz analytics:platform <id>` — platform-level analytics
-- `postiz analytics:post <id>` — per-post metrics (likes, comments, reach)
-- `postiz upload <file>` — upload media
-
-## N8N Integration
-- N8N running at `http://localhost:5678`
-- npm package `n8n-nodes-postiz` available for workflow automation
-- Can trigger Postiz actions from N8N workflows
+## MCP Servers (.mcp.json)
+- **postiz**: `npx postiz` — posting, scheduling, per-post analytics
+- **playwright**: `npx @playwright/mcp@latest` — browser automation for ANY page
 
 ## Slash Commands
 
 | Command | Purpose | Index ID |
 |---------|---------|----------|
+| /setup | **First-time setup — start here** | [F:CMD.10] |
 | /post | Create + publish to any platform | [F:CMD.01] |
 | /draft | Draft without publishing | [F:CMD.02] |
 | /schedule | Schedule a post for later | [F:CMD.03] |
-| /analytics | Pull per-post metrics (likes, comments, reach) | [F:CMD.04] |
-| /browse-social | Playwright browser session | [F:CMD.05] |
-| /repurpose | Reformat content cross-platform | [F:CMD.06] |
-| /audit | Profile completeness audit | [F:CMD.07] |
-| /track-analytics | Capture + record post metrics over time | [F:CMD.09] |
+| /analytics | See how posts are performing | [F:CMD.04] |
+| /track-analytics | Capture + record metrics over time | [F:CMD.09] |
+| /browse-social | Open any platform in browser | [F:CMD.05] |
+| /repurpose | Adapt content for different platforms | [F:CMD.06] |
+| /audit | Check profile completeness | [F:CMD.07] |
 | /index-check | Validate index integrity | [F:CMD.08] |
+
+## Before Any Command
+1. Run onboarding checks [F:SKILL.07] — Docker running? API key set? Accounts connected?
+2. If posting: ask which account if user has multiple
+3. Read voice rules [F:SKILL.01] and format rules [F:SKILL.02]
+4. Show draft before publishing — NEVER auto-publish
+
+## Multi-Account Support
+Team members can connect multiple accounts per platform:
+- Personal LinkedIn + Company LinkedIn page
+- Brand Instagram + Personal Instagram
+- Multiple Twitter accounts
+Always ask which account to use. Store friendly names mapped to integration IDs.
 
 ## Browser Automation
 Read `skills/browser-automation.md` [F:SKILL.05] before ANY Playwright interaction.
-Uses Snapshot → Act → Verify loop. Works on ANY page. Never hardcode selectors.
+Uses Snapshot → Act → Verify loop. Works on ANY page structure. Never hardcode selectors.
 
 ## Analytics Tracking
-Per-post metrics stored in `data/analytics-tracker.json` [F:DATA.01].
-Time-series snapshots: hour 0, day 1, day 7, day 30.
-Read `skills/analytics-tracking.md` [F:SKILL.06] for schema and analysis patterns.
+Per-post metrics in `data/analytics-tracker.json` [F:DATA.01].
+Time-series snapshots: hour 0 → day 1 → day 7 → day 30.
+Combines Postiz API data + Playwright scraped data + manual entries.
+Read `skills/analytics-tracking.md` [F:SKILL.06] for schema and reports.
 
-## Before Any Post
-1. Read `skills/social-voice.md` [F:SKILL.01] for tone
-2. Read `skills/post-formats.md` [F:SKILL.02] for platform-specific structure
-3. Read `config/linkedin-channels.json` [F:CONFIG.04] for integration IDs
-4. Check `skills/content-calendar.md` [F:SKILL.03] for topic/timing fit
+## Supported Platforms (13)
+LinkedIn, Twitter/X, Facebook, Instagram, TikTok, YouTube, Reddit,
+Pinterest, Threads, Bluesky, Mastodon, Discord, Dribbble
+
+## Postiz CLI Commands
+- `postiz posts:create` — create a post
+- `postiz posts:list` — list all posts
+- `postiz integrations:list` — list connected platforms
+- `postiz analytics:platform <id>` — platform-level analytics
+- `postiz analytics:post <id>` — per-post metrics
+- `postiz upload <file>` — upload media
 
 ## Index System
-- **Master index**: `docs/INDEX.md` [F:DOC.01] — every file, ID, cross-refs
-- **Variables**: `docs/VARIABLES.md` [F:DOC.02] — all env vars, keys, endpoints
-- **Dependencies**: `docs/DEPENDENCIES.md` [F:DOC.03] — file-to-file graph
-- **Features**: `docs/FEATURES.md` [F:DOC.04] — feature-to-file mapping
-- **API Reference**: `docs/API-REFERENCE.md` [F:DOC.05] — Postiz tools + endpoints
-- **Architecture**: `docs/ARCHITECTURE.md` [F:DOC.06] — system diagram
-
-**When adding/modifying ANY file, update all four index docs.**
-
-## Environment
-Required: `POSTIZ_BASE_URL`, `JWT_SECRET`, `POSTIZ_API_KEY`
-See `config/.env.example` [F:CONFIG.01] for full list.
+- Master index: `docs/INDEX.md` [F:DOC.01]
+- Variables: `docs/VARIABLES.md` [F:DOC.02]
+- Dependencies: `docs/DEPENDENCIES.md` [F:DOC.03]
+- Features: `docs/FEATURES.md` [F:DOC.04]
+- API Reference: `docs/API-REFERENCE.md` [F:DOC.05]
+- Architecture: `docs/ARCHITECTURE.md` [F:DOC.06]
 
 ## Migration to Remote Server
 1. Change `POSTIZ_BASE_URL` in `.env` to your domain
-2. Update `MAIN_URL`, `FRONTEND_URL`, `NEXT_PUBLIC_BACKEND_URL` to match
-3. Update `POSTIZ_MCP_URL` to `https://yourdomain.com:3084/sse`
-4. Update `.mcp.json` [F:ROOT.06] postiz URL to match
-5. Add reverse proxy (Nginx/Caddy) with SSL
-6. `docker compose up -d` on the server
-7. All skills and commands work unchanged — they use MCP, not direct URLs
-
-## Post Analytics Tracking
-Every post tracks: Likes/Reactions, Comments, Shares, Impressions, Reach, Engagement Rate, Click-through, Saves/Bookmarks. Use `/analytics` to pull metrics for any post on any connected platform.
+2. Update derived URLs to match
+3. Add reverse proxy with SSL
+4. `docker compose up -d` on the server
+5. All skills and commands work unchanged
