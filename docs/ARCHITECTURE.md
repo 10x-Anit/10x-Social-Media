@@ -7,52 +7,49 @@
 ┌─────────────────────────────────────────────────────────────┐
 │                      YOUR MACHINE                           │
 │                                                             │
-│  ┌──────────────┐     ┌──────────────────────────────────┐  │
-│  │  Claude Code  │────▶│  .mcp.json [F:ROOT.06]           │  │
-│  │  (terminal)   │     │  Registers MCP servers           │  │
-│  │              │     └──────────┬───────────┬───────────┘  │
-│  │  /post       │               │           │               │
-│  │  /draft      │               ▼           ▼               │
-│  │  /schedule   │     ┌─────────────┐ ┌──────────────┐     │
-│  │  /analytics  │     │ Postiz CLI  │ │ Playwright   │     │
-│  │  /browse     │     │ npx postiz  │ │ MCP (local)  │     │
-│  │  /repurpose  │     │ (stdio MCP) │ │              │     │
-│  │  /audit      │     └──────┬──────┘ └──────┬───────┘     │
-│  └──────────────┘            │               │              │
-│                              ▼               │              │
 │  ┌──────────────────────────────────────────────────────┐   │
-│  │              Docker Compose [F:ROOT.05]               │   │
+│  │              ACCESS LAYER                             │   │
+│  │                                                       │   │
+│  │  Claude Code ─── terminal (/post, /analytics, etc.)   │   │
+│  │  Claude App ──── mobile (Remote Control)              │   │
+│  │  Chat Bots ───── opencode-plugin/ (TG/Slack/DC/WA)   │   │
+│  │  Dashboard ───── browser (localhost:4200)              │   │
+│  └──────────────┬───────────┬──────────────┬────────────┘   │
+│                 │           │              │                 │
+│                 ▼           ▼              ▼                 │
+│  ┌──────────┐ ┌──────────┐ ┌──────────────┐                │
+│  │ Postiz   │ │ Composio │ │ Playwright   │                │
+│  │ CLI/MCP  │ │ MCP      │ │ MCP          │                │
+│  │ (posts,  │ │ (OAuth,  │ │ (browser     │                │
+│  │ schedule)│ │ API tools│ │  automation)  │                │
+│  └────┬─────┘ └────┬─────┘ └──────────────┘                │
+│       │             │                                       │
+│       ▼             ▼                                       │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │              Docker (3 containers)                    │   │
 │  │                                                       │   │
 │  │  ┌─────────────────────────────────────────────────┐  │   │
 │  │  │  Postiz App (:4200)                             │  │   │
-│  │  │  - Web Dashboard (calendar, analytics)          │  │   │
+│  │  │  - Dashboard, calendar, visual scheduling       │  │   │
 │  │  │  - Public API (/api/public/v1/*)                │  │   │
-│  │  │  - OAuth handlers for all platforms             │  │   │
+│  │  │  - OAuth (or Composio handles auth)             │  │   │
 │  │  └─────────────┬──────────────┬────────────────────┘  │   │
 │  │                │              │                        │   │
-│  │  ┌─────────────▼──┐  ┌───────▼────────┐  ┌────────┐  │   │
-│  │  │ PostgreSQL     │  │ Redis          │  │Temporal│  │   │
-│  │  │ :5432          │  │ :6379          │  │ :7233  │  │   │
-│  │  │ (posts, users, │  │ (cache, queue) │  │(tasks) │  │   │
-│  │  │  analytics)    │  │                │  │        │  │   │
-│  │  └────────────────┘  └────────────────┘  └────────┘  │   │
+│  │  ┌─────────────▼──┐  ┌───────▼────────┐              │   │
+│  │  │ PostgreSQL     │  │ Redis          │              │   │
+│  │  │ (posts, users, │  │ (cache, queue) │              │   │
+│  │  │  analytics)    │  │                │              │   │
+│  │  └────────────────┘  └────────────────┘              │   │
 │  └──────────────────────────────────────────────────────┘   │
-│                                                             │
-│  ┌──────────────┐                                           │
-│  │  N8N (:5678) │ ← n8n-nodes-postiz for workflow automtn  │
-│  └──────────────┘                                           │
 │                              │                              │
 └──────────────────────────────┼──────────────────────────────┘
                                │
-                               ▼
-              ┌────────────────────────────────┐
-              │     Social Media Platforms      │
-              │  LinkedIn, Twitter/X, Facebook, │
-              │  Instagram, TikTok, YouTube,    │
-              │  Reddit, Pinterest, Threads,    │
-              │  Bluesky, Mastodon, Discord,    │
-              │  Dribbble                       │
-              └────────────────────────────────┘
+              ┌────────────────┼────────────────┐
+              ▼                ▼                ▼
+   Temporal Cloud      Composio Cloud    Social Platforms
+   (scheduling,        (managed OAuth)   LinkedIn, Twitter/X,
+    retries)                             Facebook, Instagram,
+                                         TikTok, YouTube, etc.
 ```
 
 ## Data Flow: Creating a Post
@@ -111,15 +108,12 @@ LOCAL                              REMOTE
 POSTIZ_BASE_URL=                   POSTIZ_BASE_URL=
   http://localhost:4200     →        https://social.yourdomain.com
 
-POSTIZ_MCP_URL=                    POSTIZ_MCP_URL=
-  http://localhost:3084/sse →        https://social.yourdomain.com:3084/sse
-
-.mcp.json postiz.url=              .mcp.json postiz.url=
-  http://localhost:3084/sse →        https://social.yourdomain.com:3084/sse
-
 docker-compose.yml                 Same docker-compose.yml
   (same file, reads .env)           + Nginx/Caddy reverse proxy with SSL
 
-Skills, commands, templates        UNCHANGED — they use MCP tools,
-                                   not direct URLs
+opencode-plugin/.env               Update POSTIZ_BASE_URL to remote URL
+  POSTIZ_BASE_URL=localhost  →      POSTIZ_BASE_URL=https://social.yourdomain.com
+
+Skills, commands, templates,       UNCHANGED — they use MCP tools
+MCP servers, Composio, Temporal    and env vars, not hardcoded URLs
 ```

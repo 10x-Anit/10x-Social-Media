@@ -7,11 +7,12 @@
 |----|------|------|----------|--------|-----------|-------------|
 | [V:POSTIZ_BASE_URL] | POSTIZ_BASE_URL | url | YES | User config | [F:ROOT.03], [F:ROOT.05] | PUBLIC |
 | [V:POSTIZ_API_KEY] | POSTIZ_API_KEY | string | YES | Postiz Dashboard > Settings > Developers | [F:ROOT.03], [F:ROOT.05], [F:CMD.01], [F:CMD.03], [F:CMD.04], [F:SCRIPT.02] | SECRET |
-| [V:POSTIZ_MCP_URL] | POSTIZ_MCP_URL | url | YES | Derived from POSTIZ_BASE_URL | [F:ROOT.03], [F:ROOT.06], [F:CONFIG.02] | PUBLIC |
 | [V:JWT_SECRET] | JWT_SECRET | string | YES | Generated (openssl rand -base64 32) | [F:ROOT.03], [F:ROOT.05] | SECRET |
 | [V:POSTIZ_PORT] | POSTIZ_PORT | number | NO | Default: 4200 | [F:ROOT.03], [F:ROOT.05] | PUBLIC |
-| [V:MCP_PORT] | MCP_PORT | number | NO | Default: 3084 | [F:ROOT.03], [F:ROOT.05] | PUBLIC |
-| [V:TEMPORAL_UI_PORT] | TEMPORAL_UI_PORT | number | NO | Default: 8080 | [F:ROOT.03], [F:ROOT.05] | PUBLIC |
+| [V:TEMPORAL_ADDRESS] | TEMPORAL_ADDRESS | string | YES | Temporal Cloud (namespace.account.tmprl.cloud:7233) | [F:ROOT.03], [F:ROOT.05] | PUBLIC |
+| [V:TEMPORAL_NAMESPACE] | TEMPORAL_NAMESPACE | string | YES | Temporal Cloud namespace name | [F:ROOT.03], [F:ROOT.05] | PUBLIC |
+| [V:TEMPORAL_API_KEY] | TEMPORAL_API_KEY | string | YES | Temporal Cloud Settings > API Keys | [F:ROOT.03], [F:ROOT.05] | SECRET |
+| [V:COMPOSIO_API_KEY] | COMPOSIO_API_KEY | string | YES | composio.dev Dashboard > API Keys | [F:ROOT.03], [F:ROOT.06], [F:CMD.01], [F:CMD.10] | SECRET |
 
 ## Platform Keys (all optional — add per platform you use)
 

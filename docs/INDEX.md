@@ -44,6 +44,13 @@
 | [F:CMD.06] | .claude/commands/repurpose.md | /repurpose — Reformat content cross-platform | [F:SKILL.01], [F:SKILL.02], [F:TMPL.01]-[F:TMPL.04] | [FEAT:REPURPOSE] |
 | [F:CMD.07] | .claude/commands/audit.md | /audit — Profile completeness audit | [F:CONFIG.03] | [FEAT:AUDIT] |
 | [F:CMD.08] | .claude/commands/index-check.md | /index-check — Validate index integrity | [F:DOC.01]-[F:DOC.04] | [FEAT:INDEX] |
+| [F:CMD.09] | .claude/commands/track-analytics.md | /track-analytics — Capture + record metrics | [F:SKILL.05], [F:SKILL.06], [F:DATA.01] | [FEAT:ANALYTICS] |
+| [F:CMD.10] | .claude/commands/setup.md | /setup — Full automated onboarding | ALL | ALL |
+| [F:SKILL.05] | .claude/skills/browser-automation.md | Playwright Snapshot→Act→Verify playbook | — | [FEAT:BROWSE], [FEAT:ANALYTICS], [FEAT:AUDIT] |
+| [F:SKILL.06] | .claude/skills/analytics-tracking.md | Per-post time-series tracking system | [F:DATA.01] | [FEAT:ANALYTICS] |
+| [F:SKILL.07] | .claude/skills/onboarding-checks.md | Pre-flight checks before any command | — | ALL |
+| [F:DATA.01] | data/analytics-tracker.json | Persistent per-post analytics store | — | [FEAT:ANALYTICS] |
+| [F:PLUGIN.01] | opencode-plugin/ | OpenCode chat-channel plugin (Telegram/Slack/Discord/WhatsApp) | [V:POSTIZ_API_KEY], [V:POSTIZ_BASE_URL] | [FEAT:POST], [FEAT:ANALYTICS] |
 | [F:SCRIPT.01] | scripts/validate-index.sh | Check all index references resolve | [F:DOC.01]-[F:DOC.04] | [FEAT:INDEX] |
 | [F:SCRIPT.02] | scripts/sync-channels.sh | Refresh integration IDs from Postiz API | [V:POSTIZ_API_KEY], [V:POSTIZ_BASE_URL] | [FEAT:ANALYTICS] |
 | [F:SCRIPT.03] | scripts/health-check.sh | Verify MCP + env vars + Docker | [F:ROOT.03], [F:ROOT.05], [F:ROOT.06] | ALL |
