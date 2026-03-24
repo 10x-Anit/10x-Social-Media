@@ -11,27 +11,40 @@ You ask questions, they answer, you create everything.
 - Create files yourself — never tell the user to edit files manually
 - If something fails, diagnose and fix it — don't dump errors
 - Remember: the user may not be technical at all
+- This system works on **Windows, macOS, and Linux**
 
 ## Phase 1: Prerequisites Check
+
+### 1.0 Detect OS
+Detect the operating system silently. Adapt commands accordingly:
+- **Windows**: use `docker compose` (not `docker-compose`), paths use `/` in bash
+- **macOS**: use `docker compose`, may need Rosetta for ARM Macs
+- **Linux**: use `docker compose` or `docker-compose` (check which exists)
 
 ### 1.1 Docker
 ```bash
 docker --version
 ```
-- If NOT installed → "You need Docker Desktop installed first.
-  Download it from https://docker.com/products/docker-desktop
-  Install it, start it, then run /setup again."
-- If installed but not running → "Docker is installed but not running.
-  Please start Docker Desktop and run /setup again."
+- If NOT installed:
+  - **Windows/macOS**: "Install Docker Desktop from https://docker.com/products/docker-desktop"
+  - **Linux**: "Install Docker Engine: https://docs.docker.com/engine/install/"
+- If installed but not running:
+  - **Windows/macOS**: "Start Docker Desktop from your applications"
+  - **Linux**: "Start Docker with: `sudo systemctl start docker`"
 - If running → continue
+
+Check which compose command works:
+```bash
+docker compose version 2>/dev/null || docker-compose version 2>/dev/null
+```
+Use whichever succeeds for all subsequent commands.
 
 ### 1.2 Node.js
 ```bash
 node --version
 ```
-- If NOT installed → "You need Node.js installed.
-  Download it from https://nodejs.org (LTS version).
-  Install it, then run /setup again."
+- If NOT installed → "Install Node.js from https://nodejs.org (LTS version)"
+- Minimum version: 18+
 - If installed → continue
 
 ## Phase 2: Create .env File
@@ -42,8 +55,14 @@ node --version
 - If .env does NOT exist → copy from config/.env.example
 
 ### 2.2 Generate JWT Secret
-- Automatically generate: `openssl rand -base64 32`
-- Write to .env as JWT_SECRET — don't ask the user for this
+Generate automatically — try in order (cross-platform):
+```bash
+openssl rand -base64 32                              # Linux/macOS/Windows with Git Bash
+python3 -c "import secrets; print(secrets.token_urlsafe(32))"  # Any OS with Python
+python -c "import secrets; print(secrets.token_urlsafe(32))"   # Windows Python
+node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"  # Any OS with Node
+```
+Write to .env as JWT_SECRET — don't ask the user for this.
 
 ### 2.3 Ask for Temporal Cloud credentials
 ```

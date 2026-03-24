@@ -49,10 +49,14 @@ Pinterest, Threads, Bluesky, Mastodon, Discord, Dribbble
 
 ## Requirements
 
-- [Docker Desktop](https://docker.com/products/docker-desktop)
-- [Node.js](https://nodejs.org) (LTS)
-- [Claude Code](https://claude.ai/claude-code)
-- [Temporal Cloud](https://cloud.temporal.io) account (free credits available)
+Works on **Windows, macOS, and Linux**.
+
+| Requirement | Windows | macOS | Linux |
+|-------------|---------|-------|-------|
+| Docker | [Docker Desktop](https://docker.com/products/docker-desktop) | [Docker Desktop](https://docker.com/products/docker-desktop) | [Docker Engine](https://docs.docker.com/engine/install/) |
+| Node.js 18+ | [nodejs.org](https://nodejs.org) | [nodejs.org](https://nodejs.org) | [nodejs.org](https://nodejs.org) |
+| Claude Code | [claude.ai/claude-code](https://claude.ai/claude-code) | Same | Same |
+| Temporal Cloud | [cloud.temporal.io](https://cloud.temporal.io) | Same | Same |
 
 ## Mobile Access
 
