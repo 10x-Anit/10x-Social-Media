@@ -68,12 +68,25 @@ Write to .env:
 
 ### 2.4 Set base URLs
 Ask: "Will you use this locally or on a server?"
-- If LOCAL (default): set POSTIZ_BASE_URL=http://localhost:4200
-- If SERVER: ask for domain, set accordingly
+- If LOCAL (default):
+  - POSTIZ_BASE_URL=http://localhost:4200
+  - POSTIZ_API_URL=http://localhost:4200/api
+  - MAIN_URL=http://localhost:4200
+  - FRONTEND_URL=http://localhost:4200
+  - NEXT_PUBLIC_BACKEND_URL=http://localhost:4200/api
+- If SERVER: ask for domain, derive all URLs from it:
+  - POSTIZ_BASE_URL=https://{domain}
+  - POSTIZ_API_URL=https://{domain}/api
+  - MAIN_URL=https://{domain}
+  - FRONTEND_URL=https://{domain}
+  - NEXT_PUBLIC_BACKEND_URL=https://{domain}/api
+
+IMPORTANT: POSTIZ_API_URL must end with /api (not /api/public/v1).
+The Postiz CLI appends the rest of the path automatically.
 
 ### 2.5 Write the complete .env
 Read config/.env.example as template, fill in all values, write to .env.
-Leave social media platform keys empty — those get filled via Postiz dashboard.
+Leave social media platform keys empty — those get filled via Composio or dashboard.
 
 ## Phase 3: Start Docker Services
 
