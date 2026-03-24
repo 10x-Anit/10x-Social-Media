@@ -9,8 +9,15 @@ node_modules/
 Thumbs.db
 desktop.ini
 
-# Docker volumes (if local)
-# data/ is tracked (analytics-tracker.json lives there)
+# Claude Code local settings (machine-specific permissions)
+.claude/settings.local.json
+
+# Playwright MCP logs
+.playwright-mcp/
+
+# Personal data files (only analytics-tracker.json is tracked)
+data/*.csv
+data/*.xlsx
 
 # Temp files
 *.tmp

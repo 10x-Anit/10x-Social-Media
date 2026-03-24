@@ -7,7 +7,7 @@ analyze posts across 13 platforms — all from your terminal or browser.
 
 ```bash
 # 1. Clone the repo
-git clone https://github.com/10x-Anit/10x-Social-Media.git
+git clone <repo-url>
 cd 10x-Social-Media
 
 # 2. Open in Claude Code

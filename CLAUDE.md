@@ -21,7 +21,7 @@ Always be helpful. Never show raw errors. Explain what's wrong and how to fix it
 - **Postiz App** → `http://localhost:4200` (dashboard, API, OAuth)
 - **PostgreSQL** → internal (posts, users, analytics)
 - **Redis** → internal (cache, queue)
-- **Temporal Cloud** → `prod.ksrs0.tmprl.cloud` (scheduling, retries — managed)
+- **Temporal Cloud** → configured via TEMPORAL_ADDRESS in .env (scheduling, retries — managed)
 
 ## MCP Servers (.mcp.json)
 - **postiz**: `npx postiz` — posting, scheduling, per-post analytics
