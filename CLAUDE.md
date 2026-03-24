@@ -25,7 +25,16 @@ Always be helpful. Never show raw errors. Explain what's wrong and how to fix it
 
 ## MCP Servers (.mcp.json)
 - **postiz**: `npx postiz` — posting, scheduling, per-post analytics
+- **composio**: `npx @composio/mcp` — one-click OAuth, platform API tools (post, analytics)
 - **playwright**: `npx @playwright/mcp@latest` — browser automation for ANY page
+
+## Composio (Account Connections)
+Composio handles OAuth for social platforms — users click a link to authorize instead
+of creating developer apps. Use Composio MCP tools to:
+- Initiate connections (generates auth URL for user to click)
+- Post directly via platform tools (LINKEDIN_CREATE_POST, TWITTER_CREATE_TWEET, etc.)
+- Pull analytics via platform tools
+Composio and Postiz connections work independently — use whichever is available.
 
 ## Slash Commands
 

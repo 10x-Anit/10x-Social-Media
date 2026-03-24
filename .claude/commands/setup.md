@@ -128,11 +128,22 @@ Great! Now let's get your API key:
 
 ## Phase 5: Connect Social Media Accounts
 
-### 5.1 Platform selection
+### 5.1 Composio API Key
 ```
-Which social media platforms do you want to connect?
+To connect your social media accounts, we use Composio.
+It handles all the OAuth for you — just click a link and authorize.
+No developer apps needed.
 
-Postiz supports all of these:
+Do you have a Composio API key?
+```
+- If YES → paste it, write to .env as COMPOSIO_API_KEY
+- If NO → "Sign up free at composio.dev, go to Dashboard → API Keys, copy the key and paste it here."
+- Write to .env, restart not needed (Composio runs via MCP, reads env directly)
+
+### 5.2 Platform selection
+```
+Which platforms do you want to connect?
+
  • LinkedIn (personal profile or company page)
  • Twitter / X
  • Facebook (page)
@@ -147,57 +158,47 @@ Postiz supports all of these:
  • Discord
  • Dribbble
 
-Tell me which ones you want to set up.
+Tell me which ones.
 ```
 
-### 5.2 Developer credentials guidance
-For each platform the user selects, explain:
-```
-To connect {{platform}}, you'll need developer credentials.
-Here's how to get them:
+### 5.3 Connect via Composio (primary method)
+For each selected platform:
+1. Use Composio MCP to initiate a connection for the platform
+2. Composio generates an authorization URL
+3. Tell user: "Click this link to connect {{platform}}: {{url}}"
+4. User clicks → authorizes in browser → connection stored in Composio
+5. Verify: use Composio MCP to check connection status
+6. "{{platform}} connected successfully!"
 
-{{platform-specific instructions}}
+Note: Twitter/X may require the user's own API keys (Composio dropped
+managed auth for X in Feb 2026). If so, fall back to manual setup:
+ask for X_API_KEY and X_API_SECRET.
 
-Once you have the Client ID and Client Secret, paste them here.
+### 5.4 Also connect in Postiz dashboard (for scheduling/calendar)
 ```
+Your accounts are connected via Composio for posting.
+For the visual calendar and scheduling, also connect them in the dashboard:
 
-Write each credential pair to .env and restart Postiz.
-
-### 5.3 LinkedIn-specific
-```
-LinkedIn Developer Setup:
-1. Go to linkedin.com/developers → Create App
-2. App name: anything (e.g., "My Social Manager")
-3. Company: select your LinkedIn company page
-4. In "Auth" tab, add this redirect URL:
-   http://localhost:4200/integrations/social/linkedin
-5. In "Products" tab, request:
-   - Share on LinkedIn
-   - Sign In with LinkedIn using OpenID Connect
-6. Copy Client ID and Client Secret, paste them here.
-```
-
-### 5.4 Connect via dashboard
-After credentials are in .env and Postiz is restarted:
-```
-Now connect your account:
 1. Open http://localhost:4200
 2. Go to Channels → Add Channel → {{platform}}
-3. Click Connect — you'll be redirected to log in
-4. Authorize the app
-5. Tell me when done
+3. Click Connect — follow the login flow
+4. This lets you use the drag-drop calendar and see analytics in the UI
 ```
 
+Note: If user already has developer credentials (client_id/secret) from
+their own apps, they can use those in Postiz directly. Composio and Postiz
+connections work independently — both are available.
+
 ### 5.5 Verify connections
-- Run `postiz integrations:list` to confirm
-- Show user their connected accounts with friendly names
-- Sync to config/linkedin-channels.json
+- Check Composio connections via MCP
+- Run `postiz integrations:list` for Postiz connections
+- Show user their full list of connected accounts
 
 ### 5.6 Multiple accounts
 ```
-Do you want to connect additional accounts for {{platform}}?
-For example, both a personal profile AND a company page?
-You can connect as many as you need.
+Want to connect more accounts for {{platform}}?
+For example, a personal LinkedIn AND a company page?
+Just click the connect link again for each account.
 ```
 
 ## Phase 6: Personalize
