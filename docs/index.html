@@ -28,10 +28,21 @@ nav .links{display:flex;gap:2rem;font-size:.9rem;color:var(--muted)}
 nav .links a:hover{color:var(--text)}
 
 /* Hero */
-.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:8rem 2rem 4rem;position:relative}
-.hero h1{font-size:clamp(2.5rem,6vw,5rem);font-weight:800;letter-spacing:-.04em;line-height:1.1;margin-bottom:1.5rem;background:linear-gradient(135deg,#fff 0%,var(--accent) 50%,var(--accent2) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:shimmer 3s ease-in-out infinite alternate}
-@keyframes shimmer{0%{background-position:0% 50%}100%{background-position:100% 50%}}
-.hero p{font-size:1.25rem;color:var(--muted);max-width:600px;line-height:1.6;margin-bottom:2.5rem}
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:10rem 2rem 4rem;position:relative}
+.hero h1{font-size:clamp(2.5rem,6vw,4.5rem);font-weight:800;letter-spacing:-.04em;line-height:1.2;padding-bottom:.15em;margin-bottom:1.5rem;background:linear-gradient(135deg,#fff 0%,var(--accent) 50%,var(--accent2) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-desc{font-size:1.25rem;color:var(--muted);max-width:600px;line-height:1.6;margin-bottom:2.5rem;opacity:0;animation:fadeUp .8s ease .3s forwards}
+.hero-desc code{background:rgba(99,102,241,.2);color:var(--accent);padding:.15em .4em;border-radius:4px;font-size:.95em}
+.hero h1 .line{display:block;opacity:0;transform:translateY(30px);animation:lineIn .8s ease forwards}
+.hero h1 .line:nth-child(1){animation-delay:.2s}
+.hero h1 .line:nth-child(2){animation-delay:.6s}
+.hero h1 .cursor{display:inline-block;width:3px;height:1em;background:var(--accent);margin-left:4px;vertical-align:text-bottom;animation:blink .7s step-end infinite}
+@keyframes lineIn{to{opacity:1;transform:translateY(0)}}
+@keyframes blink{50%{border-color:transparent;background:transparent}}
+
+/* Terminal typing animation */
+.term-line{opacity:0;transform:translateX(-10px);animation:termIn .4s ease forwards}
+@keyframes termIn{to{opacity:1;transform:translateX(0)}}
+/* .hero p replaced by .hero-desc */
 .hero-badges{display:flex;gap:1rem;margin-bottom:3rem;flex-wrap:wrap;justify-content:center}
 .badge{padding:.5rem 1.2rem;border-radius:100px;font-size:.85rem;font-weight:600;border:1px solid var(--border);background:var(--card);animation:fadeUp .6s ease both}
 .badge:nth-child(1){animation-delay:.1s}.badge:nth-child(2){animation-delay:.2s}.badge:nth-child(3){animation-delay:.3s}.badge:nth-child(4){animation-delay:.4s}
@@ -131,8 +142,8 @@ footer .brand{font-size:1.1rem;font-weight:600;color:var(--text);margin-bottom:.
 </nav>
 
 <section class="hero">
-  <h1>Your Social Media.<br>AI-Managed.</h1>
-  <p>Clone the repo. Run /setup. Claude AI builds your entire social media management system — installs everything, connects your accounts, writes in your voice.</p>
+  <h1 id="hero-title"></h1>
+  <p class="hero-desc">Clone the repo. Run <code>/setup</code>. Claude AI builds your entire social media management system — installs everything, connects your accounts, writes in your voice.</p>
   <div class="hero-badges">
     <div class="badge">13 Platforms</div>
     <div class="badge">10 Commands</div>
@@ -149,18 +160,7 @@ footer .brand{font-size:1.1rem;font-weight:600;color:var(--text);margin-bottom:.
       <div class="terminal-dot"></div>
       <div class="terminal-dot"></div>
     </div>
-    <div class="terminal-body">
-      <span class="prompt">$</span> <span class="cmd">claude</span><br>
-      <span class="prompt">></span> <span class="cmd">/setup</span><br>
-      <span class="output">Welcome! Setting up your system...</span><br>
-      <span class="success">✓</span> <span class="output">Docker installed</span><br>
-      <span class="success">✓</span> <span class="output">Postiz running at localhost:4200</span><br>
-      <span class="success">✓</span> <span class="output">LinkedIn connected (OpenAnalyst)</span><br>
-      <span class="success">✓</span> <span class="output">Voice personalized</span><br>
-      <span class="success">✓</span> <span class="output">Setup complete! Say /post to begin.</span><br><br>
-      <span class="prompt">></span> <span class="cmd">/post Write about our product launch on LinkedIn</span><br>
-      <span class="success">✅ Published to OpenAnalyst (LinkedIn)</span>
-    </div>
+    <div class="terminal-body" id="terminal-anim"></div>
   </div>
 </section>
 
@@ -272,10 +272,91 @@ footer .brand{font-size:1.1rem;font-weight:600;color:var(--text);margin-bottom:.
 </footer>
 
 <script>
+// Scroll reveal
 const observer = new IntersectionObserver((entries) => {
   entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
 }, { threshold: 0.1 });
 document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// Hero title — animated lines
+const title = document.getElementById('hero-title');
+const lines = ['Your Social Media.', 'AI-Managed.'];
+lines.forEach((text, i) => {
+  const span = document.createElement('span');
+  span.className = 'line';
+  span.textContent = text;
+  if (i === lines.length - 1) {
+    const cursor = document.createElement('span');
+    cursor.className = 'cursor';
+    span.appendChild(cursor);
+  }
+  title.appendChild(span);
+});
+
+// Terminal — sequential typing animation
+const termEl = document.getElementById('terminal-anim');
+const termLines = [
+  { type: 'cmd', text: '$ claude' },
+  { type: 'cmd', text: '> /setup' },
+  { type: 'out', text: 'Welcome! Setting up your system...' },
+  { type: 'ok', text: '✓ Docker installed and running' },
+  { type: 'ok', text: '✓ Node.js v22.14 detected' },
+  { type: 'ok', text: '✓ .env created with your credentials' },
+  { type: 'ok', text: '✓ Postiz running at localhost:4200' },
+  { type: 'ok', text: '✓ LinkedIn connected (OpenAnalyst)' },
+  { type: 'ok', text: '✓ Voice personalized' },
+  { type: 'ok', text: '✓ Setup complete! Say /post to begin.' },
+  { type: 'blank', text: '' },
+  { type: 'cmd', text: '> /post Write about our product launch on LinkedIn' },
+  { type: 'success', text: '✅ Published to OpenAnalyst (LinkedIn)' },
+];
+
+let lineIdx = 0;
+function addTermLine() {
+  if (lineIdx >= termLines.length) return;
+  const l = termLines[lineIdx];
+  const div = document.createElement('div');
+  div.className = 'term-line';
+  div.style.animationDelay = '0s';
+
+  if (l.type === 'cmd') {
+    div.innerHTML = '<span style="color:#22c55e">' + l.text.charAt(0) + '</span> <span style="color:#fff">' + l.text.slice(2) + '</span>';
+  } else if (l.type === 'ok') {
+    div.innerHTML = '<span style="color:#22c55e">' + l.text.slice(0,1) + '</span> <span style="color:#94a3b8">' + l.text.slice(2) + '</span>';
+  } else if (l.type === 'success') {
+    div.innerHTML = '<span style="color:#22c55e;font-weight:600">' + l.text + '</span>';
+  } else if (l.type === 'blank') {
+    div.innerHTML = '<br>';
+  } else {
+    div.innerHTML = '<span style="color:#94a3b8">' + l.text + '</span>';
+  }
+
+  termEl.appendChild(div);
+  lineIdx++;
+  const delay = l.type === 'cmd' ? 600 : l.type === 'blank' ? 200 : 350;
+  setTimeout(addTermLine, delay);
+}
+
+// Start terminal animation after hero title finishes
+setTimeout(addTermLine, 1500);
+
+// Smooth scroll for nav links
+document.querySelectorAll('nav a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    document.querySelector(a.getAttribute('href')).scrollIntoView({ behavior: 'smooth' });
+  });
+});
+
+// Parallax orbs on mouse move
+document.addEventListener('mousemove', e => {
+  const x = (e.clientX / window.innerWidth - 0.5) * 20;
+  const y = (e.clientY / window.innerHeight - 0.5) * 20;
+  document.querySelectorAll('.orb').forEach((orb, i) => {
+    const speed = (i + 1) * 0.5;
+    orb.style.transform = `translate(${x * speed}px, ${y * speed}px)`;
+  });
+});
 </script>
 </body>
 </html>
