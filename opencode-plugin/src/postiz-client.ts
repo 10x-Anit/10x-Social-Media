@@ -69,7 +69,7 @@ export class PostizClient {
   async uploadMedia(file: Buffer, filename: string): Promise<{ url: string }> {
     this.trackRequest();
     const form = new FormData();
-    form.append("file", new Blob([file]), filename);
+    form.append("file", new Blob([new Uint8Array(file)]), filename);
     const res = await fetch(`${this.baseUrl}/api/public/v1/upload`, {
       method: "POST",
       headers: { Authorization: `Bearer ${this.apiKey}` },
