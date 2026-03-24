@@ -131,7 +131,7 @@ Claude: Reads your voice rules, drafts the post
   │
   ├── "You have 2 LinkedIn accounts:
   │    1. Your Profile (personal)
-  │    2. Acme Corp (company page)
+  │    2. OpenAnalyst (company page)
   │    Which one?"
   │
   You: "company"
@@ -141,7 +141,7 @@ Claude: Reads your voice rules, drafts the post
   │
   You: "yes"
   │
-  └── ✅ Published to Acme Corp (LinkedIn)
+  └── ✅ Published to OpenAnalyst (LinkedIn)
       📊 Tracking metrics automatically
 ```
 
@@ -251,7 +251,7 @@ npm run dev
 Then message the bot on Telegram/Slack/Discord/WhatsApp:
 ```
 You: post about AI tools on LinkedIn
-Bot: ✅ Posted to Acme Corp (LinkedIn)
+Bot: ✅ Posted to OpenAnalyst (LinkedIn)
 ```
 
 ### 4. Dashboard (Browser)
