@@ -1,144 +1,271 @@
-# /setup — First-time setup for a new team member
+# /setup — Complete automated setup for new user
 <!-- [F:CMD.10] -->
 <!-- Features: ALL -->
 
-You are onboarding a new team member to the 10x Social Media system. Walk them
-through EVERYTHING step by step. Assume they know NOTHING technical.
+You are the installer. The user just cloned this repo and you need to build
+their entire local system from scratch. They should NOT manually edit any files.
+You ask questions, they answer, you create everything.
 
-## When to trigger this
-- First time a user runs ANY command and the system isn't configured
-- When a user explicitly runs /setup
-- When any command fails because of missing credentials or connections
+## IMPORTANT BEHAVIOR
+- Ask ONE question at a time, wait for answer
+- Create files yourself — never tell the user to edit files manually
+- If something fails, diagnose and fix it — don't dump errors
+- Remember: the user may not be technical at all
 
-## Step 1: Welcome
+## Phase 1: Prerequisites Check
+
+### 1.1 Docker
+```bash
+docker --version
 ```
-Welcome to 10x Social Media! 🚀
+- If NOT installed → "You need Docker Desktop installed first.
+  Download it from https://docker.com/products/docker-desktop
+  Install it, start it, then run /setup again."
+- If installed but not running → "Docker is installed but not running.
+  Please start Docker Desktop and run /setup again."
+- If running → continue
 
-I'm going to help you set up everything so you can:
-• Create and schedule posts to any social media platform
-• Track post performance (likes, comments, reach, impressions)
-• Repurpose content across platforms
-• Get AI-powered content recommendations
+### 1.2 Node.js
+```bash
+node --version
+```
+- If NOT installed → "You need Node.js installed.
+  Download it from https://nodejs.org (LTS version).
+  Install it, then run /setup again."
+- If installed → continue
 
-This will take about 5-10 minutes. Let's go.
+## Phase 2: Create .env File
+
+### 2.1 Check if .env exists
+- If .env already exists → "I found an existing .env file. Want to
+  reconfigure from scratch or keep your current settings?"
+- If .env does NOT exist → copy from config/.env.example
+
+### 2.2 Generate JWT Secret
+- Automatically generate: `openssl rand -base64 32`
+- Write to .env as JWT_SECRET — don't ask the user for this
+
+### 2.3 Ask for Temporal Cloud credentials
+```
+Do you have a Temporal Cloud account?
+
+Temporal Cloud handles reliable scheduling — it makes sure your
+scheduled posts go out even if your computer restarts.
+
+→ If YES: "Please go to cloud.temporal.io and give me:
+   1. Your namespace name (looks like: prod.xxxxx or something.xxxxx)
+   2. Your API key (generate one in Settings → API Keys)"
+
+→ If NO: "You can sign up at cloud.temporal.io — they give you
+   $1,000 in free credits to start. Want to continue without
+   scheduling for now?" (If yes, leave TEMPORAL vars as placeholders)
 ```
 
-## Step 2: Check Docker Services
-- Run `docker ps` to check if Postiz, PostgreSQL, Redis are running
-- If NOT running:
-  ```
-  The social media platform needs to be running first.
-  Please run this command in your terminal:
+Write to .env:
+- TEMPORAL_ADDRESS=<namespace>.tmprl.cloud:7233
+- TEMPORAL_NAMESPACE=<namespace>
+- TEMPORAL_API_KEY=<their key>
 
-  cd "path/to/10x Social Media"
-  docker compose up -d
+### 2.4 Set base URLs
+Ask: "Will you use this locally or on a server?"
+- If LOCAL (default): set POSTIZ_BASE_URL=http://localhost:4200
+- If SERVER: ask for domain, set accordingly
 
-  Then run /setup again.
-  ```
-- If running, continue
+### 2.5 Write the complete .env
+Read config/.env.example as template, fill in all values, write to .env.
+Leave social media platform keys empty — those get filled via Postiz dashboard.
 
-## Step 3: Postiz Account
-- Check if user can access http://localhost:4200
-- Ask: "Have you created your account on the Postiz dashboard yet?"
-  - If NO: "Open http://localhost:4200 in your browser and create an account.
-    Use your work email. Tell me when done."
-  - If YES: continue
+## Phase 3: Start Docker Services
 
-## Step 4: Postiz API Key
-- Ask: "Now go to Settings → Developers in the Postiz dashboard.
-  Copy your Public API key and paste it here."
-- When they paste it:
-  - Save to .env as POSTIZ_API_KEY
-  - Verify by calling `postiz integrations:list`
-  - If it works: "API key is working."
-  - If it fails: "That key didn't work. Please double-check and try again."
-
-## Step 5: Connect Social Media Accounts
-- Ask: "Which social media platforms do you want to connect?"
-- Show the list:
-  ```
-  Available platforms in Postiz:
-  1. LinkedIn (personal profile or company page)
-  2. Twitter / X
-  3. Facebook (page)
-  4. Instagram (business account)
-  5. TikTok
-  6. YouTube
-  7. Reddit
-  8. Pinterest
-  9. Threads
-  10. Bluesky
-  11. Mastodon
-  12. Discord
-  13. Dribbble
-  ```
-- For each selected platform:
-  ```
-  To connect {{platform}}:
-  1. Open http://localhost:4200 in your browser
-  2. Go to the Channels/Integrations section
-  3. Click "Add Channel" → select {{platform}}
-  4. Follow the OAuth login flow
-  5. Tell me when done
-  ```
-- After connecting, run `postiz integrations:list` to verify
-- Show them their connected accounts with names and IDs
-
-## Step 6: Multiple Accounts
-- Ask: "Do you manage multiple accounts for any platform?
-  For example, a personal LinkedIn AND a company LinkedIn page?"
-- If YES:
-  ```
-  Great! Connect each account separately in the Postiz dashboard.
-  When you use /post, I'll ask which account to post to.
-  Your connected accounts:
-  - LinkedIn: "John's Profile" (personal)
-  - LinkedIn: "Acme Corp" (company page)
-  - Instagram: "@acme_official" (business)
-  ```
-
-## Step 7: Sync Channels
-- Run `scripts/sync-channels.sh` or equivalent to populate config/linkedin-channels.json
-- Confirm all integrations are cached
-
-## Step 8: Personalize Voice
-- Ask: "Let's set up your posting style. Tell me about your brand voice:
-  1. What industry are you in?
-  2. How would you describe your tone? (professional, casual, witty, etc.)
-  3. Any words or phrases you always/never use?
-  4. What topics do you mainly post about?"
-- Based on answers, offer to customize skills/social-voice.md
-  or create a personal voice file
-
-## Step 9: Test Post
-- Offer: "Want to create a test draft to make sure everything works?"
-- If YES: run through /draft flow with their first platform
-- Show the result but DON'T publish
-
-## Step 10: Summary
+### 3.1 Start the stack
+```bash
+cd "<project directory>"
+docker compose up -d
 ```
-Setup complete! Here's what you can do:
+- Show progress: "Starting Postiz platform... this may take a few minutes
+  on first run (downloading container images)."
+- Wait for containers to be healthy
+- Check: `docker ps` — verify postiz-app, postiz-postgres, postiz-redis
 
-Commands:
-  /post          — Write and publish a post
-  /draft         — Draft without publishing
-  /schedule      — Schedule a post for later
-  /analytics     — See how your posts are performing
-  /track-analytics — Capture detailed metrics over time
-  /browse-social — Open any platform in the browser
-  /repurpose     — Adapt content for different platforms
-  /audit         — Check your profile completeness
+### 3.2 Wait for backend
+- Wait 30 seconds for Postiz backend to initialize
+- Check backend logs for "Backend is running on: http://localhost:3000"
+- If NOT starting → check logs, diagnose, and fix
+  (common issue: Temporal connection — if fails, suggest skipping Temporal
+  for now and using self-hosted Temporal as fallback)
 
-Your connected accounts:
-  {{list accounts}}
+### 3.3 Verify
+- Confirm Postiz is accessible at the configured URL
+- "The platform is running at http://localhost:4200"
 
-Tips:
-  • I'll always show you the draft before publishing
-  • Say "post to [account name]" to target specific accounts
-  • Ask me "how did my last post do?" anytime
-  • I'll remember your voice and style preferences
+## Phase 4: Postiz Account Setup
 
-Ready to create your first post? Just say /post!
+### 4.1 Create account
+```
+Now let's create your account:
+
+1. Open http://localhost:4200 in your browser
+2. You'll see a registration page
+3. Enter your email, password, and company name
+4. Click "Create Account"
+
+Tell me when you've created your account.
+```
+
+### 4.2 Get API Key
+```
+Great! Now let's get your API key:
+
+1. In the Postiz dashboard, click on Settings (gear icon)
+2. Go to "Developers" section
+3. You'll see your Public API key
+4. Copy it and paste it here
+```
+- When they paste it: write to .env as POSTIZ_API_KEY
+- Restart postiz container to pick up new env: `docker compose restart postiz`
+- Verify by running: `POSTIZ_API_KEY=<key> npx postiz integrations:list`
+- "API key is working."
+
+## Phase 5: Connect Social Media Accounts
+
+### 5.1 Platform selection
+```
+Which social media platforms do you want to connect?
+
+Postiz supports all of these:
+ • LinkedIn (personal profile or company page)
+ • Twitter / X
+ • Facebook (page)
+ • Instagram (business account)
+ • TikTok
+ • YouTube
+ • Reddit
+ • Pinterest
+ • Threads
+ • Bluesky
+ • Mastodon
+ • Discord
+ • Dribbble
+
+Tell me which ones you want to set up.
+```
+
+### 5.2 Developer credentials guidance
+For each platform the user selects, explain:
+```
+To connect {{platform}}, you'll need developer credentials.
+Here's how to get them:
+
+{{platform-specific instructions}}
+
+Once you have the Client ID and Client Secret, paste them here.
+```
+
+Write each credential pair to .env and restart Postiz.
+
+### 5.3 LinkedIn-specific
+```
+LinkedIn Developer Setup:
+1. Go to linkedin.com/developers → Create App
+2. App name: anything (e.g., "My Social Manager")
+3. Company: select your LinkedIn company page
+4. In "Auth" tab, add this redirect URL:
+   http://localhost:4200/integrations/social/linkedin
+5. In "Products" tab, request:
+   - Share on LinkedIn
+   - Sign In with LinkedIn using OpenID Connect
+6. Copy Client ID and Client Secret, paste them here.
+```
+
+### 5.4 Connect via dashboard
+After credentials are in .env and Postiz is restarted:
+```
+Now connect your account:
+1. Open http://localhost:4200
+2. Go to Channels → Add Channel → {{platform}}
+3. Click Connect — you'll be redirected to log in
+4. Authorize the app
+5. Tell me when done
+```
+
+### 5.5 Verify connections
+- Run `postiz integrations:list` to confirm
+- Show user their connected accounts with friendly names
+- Sync to config/linkedin-channels.json
+
+### 5.6 Multiple accounts
+```
+Do you want to connect additional accounts for {{platform}}?
+For example, both a personal profile AND a company page?
+You can connect as many as you need.
+```
+
+## Phase 6: Personalize
+
+### 6.1 Voice and tone
+```
+Let's set up your posting style so I write content that sounds like you.
+
+1. What industry are you in?
+2. Describe your brand tone in a few words (professional, casual, witty, bold...)
+3. Any words or phrases you ALWAYS want to use?
+4. Any words or phrases you NEVER want to use?
+5. What topics do you mainly post about?
+```
+- Update skills/social-voice.md with their answers (or create a personal override)
+
+### 6.2 Posting schedule
+```
+What's your ideal posting schedule?
+- Which days do you typically post?
+- What times work best? (e.g., "Tuesday and Thursday mornings")
+- How many posts per week?
+```
+- Update skills/content-calendar.md with their preferences
+
+## Phase 7: Test Run
+
+### 7.1 Test draft
+```
+Let's test everything with a quick draft.
+Give me a topic and I'll create a post for you.
+(This is just a draft — I won't publish anything.)
+```
+- Create a draft using their voice rules and connected platform
+- Show the preview
+- If they like it, offer to publish or schedule
+
+### 7.2 Test analytics (if posts exist)
+- If they have existing posts on connected platforms:
+  ```
+  Want me to pull analytics for your recent posts?
+  I can check how they're performing.
+  ```
+
+## Phase 8: Summary
+
+```
+✅ Setup Complete!
+
+Your system:
+  Platform:    http://localhost:4200
+  Temporal:    {{namespace}} (cloud scheduling)
+  Accounts:    {{list all connected accounts}}
+
+What you can do now:
+
+  /post            Write and publish a post
+  /draft           Draft without publishing
+  /schedule        Schedule posts for the future
+  /analytics       Check post performance
+  /track-analytics Capture detailed metrics over time
+  /browse-social   Open any site in browser
+  /repurpose       Adapt content across platforms
+  /audit           Check your profile completeness
+
+  Or just open http://localhost:4200 for the visual dashboard.
+
+Say /post to create your first post!
 ```
 
 ## User input: $ARGUMENTS
