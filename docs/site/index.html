@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>10x Social Media — AI-Powered Social Media Management</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0a0f;--card:#12121a;--border:#1e1e2e;--accent:#6366f1;--accent2:#8b5cf6;--green:#22c55e;--orange:#f97316;--text:#e2e8f0;--muted:#94a3b8;--glow:0 0 40px rgba(99,102,241,0.15)}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden}
+a{color:var(--accent);text-decoration:none}
+
+/* Floating orbs */
+.orb{position:fixed;border-radius:50%;filter:blur(80px);opacity:.15;pointer-events:none;animation:float 20s infinite ease-in-out}
+.orb-1{width:600px;height:600px;background:var(--accent);top:-200px;left:-200px;animation-delay:0s}
+.orb-2{width:500px;height:500px;background:var(--accent2);bottom:-150px;right:-150px;animation-delay:-7s}
+.orb-3{width:400px;height:400px;background:var(--green);top:50%;left:50%;animation-delay:-14s}
+@keyframes float{0%,100%{transform:translate(0,0) scale(1)}25%{transform:translate(50px,-30px) scale(1.05)}50%{transform:translate(-20px,40px) scale(.95)}75%{transform:translate(30px,20px) scale(1.02)}}
+
+/* Grid bg */
+.grid-bg{position:fixed;inset:0;background-image:linear-gradient(rgba(99,102,241,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(99,102,241,.03) 1px,transparent 1px);background-size:60px 60px;pointer-events:none}
+
+/* Nav */
+nav{position:fixed;top:0;width:100%;padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;backdrop-filter:blur(20px);background:rgba(10,10,15,.8);border-bottom:1px solid var(--border);z-index:100}
+nav .logo{font-size:1.2rem;font-weight:700;letter-spacing:-.02em}
+nav .logo span{color:var(--accent)}
+nav .links{display:flex;gap:2rem;font-size:.9rem;color:var(--muted)}
+nav .links a:hover{color:var(--text)}
+
+/* Hero */
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem;position:relative}
+.hero h1{font-size:clamp(2.5rem,6vw,5rem);font-weight:800;letter-spacing:-.04em;line-height:1.1;margin-bottom:1.5rem;background:linear-gradient(135deg,#fff 0%,var(--accent) 50%,var(--accent2) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:shimmer 3s ease-in-out infinite alternate}
+@keyframes shimmer{0%{background-position:0% 50%}100%{background-position:100% 50%}}
+.hero p{font-size:1.25rem;color:var(--muted);max-width:600px;line-height:1.6;margin-bottom:2.5rem}
+.hero-badges{display:flex;gap:1rem;margin-bottom:3rem;flex-wrap:wrap;justify-content:center}
+.badge{padding:.5rem 1.2rem;border-radius:100px;font-size:.85rem;font-weight:600;border:1px solid var(--border);background:var(--card);animation:fadeUp .6s ease both}
+.badge:nth-child(1){animation-delay:.1s}.badge:nth-child(2){animation-delay:.2s}.badge:nth-child(3){animation-delay:.3s}.badge:nth-child(4){animation-delay:.4s}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.cta-group{display:flex;gap:1rem;flex-wrap:wrap;justify-content:center}
+.cta{padding:.9rem 2rem;border-radius:12px;font-size:1rem;font-weight:600;cursor:pointer;transition:all .3s}
+.cta-primary{background:var(--accent);color:#fff;border:none;box-shadow:var(--glow)}
+.cta-primary:hover{transform:translateY(-2px);box-shadow:0 0 60px rgba(99,102,241,.3)}
+.cta-secondary{background:transparent;color:var(--text);border:1px solid var(--border)}
+.cta-secondary:hover{border-color:var(--accent)}
+
+/* Terminal */
+.terminal{max-width:700px;margin:3rem auto 0;background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:var(--glow);animation:fadeUp .8s ease .5s both}
+.terminal-bar{padding:.75rem 1rem;background:rgba(0,0,0,.3);display:flex;gap:.5rem}
+.terminal-dot{width:12px;height:12px;border-radius:50%}
+.terminal-dot:nth-child(1){background:#ff5f57}.terminal-dot:nth-child(2){background:#febc2e}.terminal-dot:nth-child(3){background:#28c840}
+.terminal-body{padding:1.5rem;font-family:'SF Mono',Monaco,'Cascadia Code',monospace;font-size:.9rem;line-height:1.8}
+.terminal-body .prompt{color:var(--green)}
+.terminal-body .cmd{color:#fff}
+.terminal-body .output{color:var(--muted)}
+.terminal-body .success{color:var(--green)}
+
+/* Sections */
+section{padding:6rem 2rem;max-width:1200px;margin:0 auto;position:relative}
+section h2{font-size:2.5rem;font-weight:700;text-align:center;margin-bottom:1rem;letter-spacing:-.03em}
+section .subtitle{text-align:center;color:var(--muted);font-size:1.1rem;margin-bottom:4rem;max-width:600px;margin-left:auto;margin-right:auto}
+
+/* Flow cards */
+.flow{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem}
+.flow-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:2rem;transition:all .3s;position:relative;overflow:hidden}
+.flow-card:hover{transform:translateY(-4px);border-color:var(--accent);box-shadow:var(--glow)}
+.flow-card .number{position:absolute;top:1rem;right:1.5rem;font-size:3rem;font-weight:800;color:rgba(99,102,241,.1)}
+.flow-card h3{font-size:1.2rem;margin-bottom:.75rem;display:flex;align-items:center;gap:.5rem}
+.flow-card p{color:var(--muted);font-size:.95rem;line-height:1.6}
+.flow-card .icon{font-size:1.5rem}
+
+/* Platform grid */
+.platforms{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:1rem;max-width:800px;margin:0 auto}
+.platform{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.2rem;text-align:center;font-size:.95rem;font-weight:500;transition:all .3s}
+.platform:hover{border-color:var(--accent);transform:scale(1.05)}
+
+/* Commands table */
+.cmd-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(350px,1fr));gap:1rem}
+.cmd-item{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.5rem;display:flex;gap:1rem;align-items:flex-start;transition:all .3s}
+.cmd-item:hover{border-color:var(--accent)}
+.cmd-item code{background:rgba(99,102,241,.15);color:var(--accent);padding:.3rem .6rem;border-radius:6px;font-size:.9rem;font-weight:600;white-space:nowrap}
+.cmd-item p{color:var(--muted);font-size:.9rem;line-height:1.5}
+
+/* Architecture */
+.arch{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:2.5rem;font-family:'SF Mono',Monaco,monospace;font-size:.8rem;line-height:1.6;overflow-x:auto;white-space:pre;color:var(--muted);box-shadow:var(--glow)}
+.arch .highlight{color:var(--accent)}
+.arch .green{color:var(--green)}
+.arch .orange{color:var(--orange)}
+
+/* Access methods */
+.access{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1.5rem}
+.access-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:2rem;text-align:center;transition:all .3s}
+.access-card:hover{transform:translateY(-4px);border-color:var(--accent);box-shadow:var(--glow)}
+.access-card .emoji{font-size:2.5rem;margin-bottom:1rem;display:block}
+.access-card h3{margin-bottom:.5rem}
+.access-card p{color:var(--muted);font-size:.9rem}
+
+/* Footer */
+footer{text-align:center;padding:4rem 2rem;border-top:1px solid var(--border);color:var(--muted);font-size:.9rem}
+footer a{color:var(--accent)}
+footer .brand{font-size:1.1rem;font-weight:600;color:var(--text);margin-bottom:.5rem}
+
+/* Scroll animations */
+.reveal{opacity:0;transform:translateY(30px);transition:all .6s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+
+@media(max-width:768px){
+  nav .links{display:none}
+  .hero h1{font-size:2.2rem}
+  .flow{grid-template-columns:1fr}
+  .cmd-grid{grid-template-columns:1fr}
+  .arch{font-size:.65rem;padding:1rem}
+}
+</style>
+</head>
+<body>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+<div class="grid-bg"></div>
+
+<nav>
+  <div class="logo"><span>10x</span> Social Media</div>
+  <div class="links">
+    <a href="#how-it-works">How It Works</a>
+    <a href="#commands">Commands</a>
+    <a href="#platforms">Platforms</a>
+    <a href="#access">Access</a>
+    <a href="https://github.com/10x-Anit/10x-Social-Media">GitHub</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <h1>Your Social Media.<br>AI-Managed.</h1>
+  <p>Clone the repo. Run /setup. Claude AI builds your entire social media management system — installs everything, connects your accounts, writes in your voice.</p>
+  <div class="hero-badges">
+    <div class="badge">13 Platforms</div>
+    <div class="badge">10 Commands</div>
+    <div class="badge">4 Access Methods</div>
+    <div class="badge">0 Manual Config</div>
+  </div>
+  <div class="cta-group">
+    <a href="https://github.com/10x-Anit/10x-Social-Media" class="cta cta-primary">Get Started</a>
+    <a href="#how-it-works" class="cta cta-secondary">See How It Works</a>
+  </div>
+  <div class="terminal">
+    <div class="terminal-bar">
+      <div class="terminal-dot"></div>
+      <div class="terminal-dot"></div>
+      <div class="terminal-dot"></div>
+    </div>
+    <div class="terminal-body">
+      <span class="prompt">$</span> <span class="cmd">claude</span><br>
+      <span class="prompt">></span> <span class="cmd">/setup</span><br>
+      <span class="output">Welcome! Setting up your system...</span><br>
+      <span class="success">✓</span> <span class="output">Docker installed</span><br>
+      <span class="success">✓</span> <span class="output">Postiz running at localhost:4200</span><br>
+      <span class="success">✓</span> <span class="output">LinkedIn connected (Acme Corp)</span><br>
+      <span class="success">✓</span> <span class="output">Voice personalized</span><br>
+      <span class="success">✓</span> <span class="output">Setup complete! Say /post to begin.</span><br><br>
+      <span class="prompt">></span> <span class="cmd">/post Write about our product launch on LinkedIn</span><br>
+      <span class="success">✅ Published to Acme Corp (LinkedIn)</span>
+    </div>
+  </div>
+</section>
+
+<section id="how-it-works">
+  <h2 class="reveal">How It Works</h2>
+  <p class="subtitle reveal">From clone to first post in 10 minutes. Claude handles everything.</p>
+  <div class="flow">
+    <div class="flow-card reveal">
+      <div class="number">01</div>
+      <h3><span class="icon">📦</span> Clone & Setup</h3>
+      <p>Clone the repo, open Claude Code, type /setup. Claude installs Docker, Node.js, creates configs, starts services — all automatically.</p>
+    </div>
+    <div class="flow-card reveal">
+      <div class="number">02</div>
+      <h3><span class="icon">🔗</span> Connect Accounts</h3>
+      <p>Click a Composio link to authorize each platform. No developer apps needed. Support for 13 platforms including LinkedIn, Twitter, Instagram.</p>
+    </div>
+    <div class="flow-card reveal">
+      <div class="number">03</div>
+      <h3><span class="icon">✍️</span> Create & Publish</h3>
+      <p>Say "post about our launch on LinkedIn" — Claude drafts in your voice, shows preview, publishes on approval. Schedule posts for the future.</p>
+    </div>
+    <div class="flow-card reveal">
+      <div class="number">04</div>
+      <h3><span class="icon">📊</span> Track & Analyze</h3>
+      <p>Per-post metrics tracked over time: likes, comments, impressions, reach, engagement rate. Weekly summaries and content type analysis.</p>
+    </div>
+    <div class="flow-card reveal">
+      <div class="number">05</div>
+      <h3><span class="icon">🔄</span> Repurpose</h3>
+      <p>Turn a LinkedIn post into a Twitter thread, Instagram caption, or TikTok script. Claude adapts format, tone, and length per platform.</p>
+    </div>
+    <div class="flow-card reveal">
+      <div class="number">06</div>
+      <h3><span class="icon">📱</span> Access Anywhere</h3>
+      <p>Terminal, mobile app, Telegram, Slack, Discord, WhatsApp, or browser dashboard. All share the same backend — everything stays in sync.</p>
+    </div>
+  </div>
+</section>
+
+<section id="commands">
+  <h2 class="reveal">Commands</h2>
+  <p class="subtitle reveal">10 slash commands. Each one is self-contained with pre-flight checks, output templates, and error handling.</p>
+  <div class="cmd-grid">
+    <div class="cmd-item reveal"><div><code>/setup</code></div><div><p><strong>Full automated setup.</strong> Installs dependencies, creates configs, connects accounts, personalizes voice. Start here.</p></div></div>
+    <div class="cmd-item reveal"><div><code>/post</code></div><div><p><strong>Create & publish.</strong> Draft in your voice, preview, approve, publish to any platform. Multi-account support.</p></div></div>
+    <div class="cmd-item reveal"><div><code>/draft</code></div><div><p><strong>Draft only.</strong> Write content without publishing. No API calls needed. Hand off to /post or /schedule.</p></div></div>
+    <div class="cmd-item reveal"><div><code>/schedule</code></div><div><p><strong>Future delivery.</strong> Pick optimal times from your calendar. Temporal Cloud ensures reliable delivery.</p></div></div>
+    <div class="cmd-item reveal"><div><code>/analytics</code></div><div><p><strong>Post performance.</strong> Likes, comments, impressions, reach, engagement rate. Compare posts, weekly summaries.</p></div></div>
+    <div class="cmd-item reveal"><div><code>/track-analytics</code></div><div><p><strong>Time-series tracking.</strong> Capture metrics at hour 0, day 1, day 7, day 30. Growth curves and trends.</p></div></div>
+    <div class="cmd-item reveal"><div><code>/browse-social</code></div><div><p><strong>Browser automation.</strong> Works on any page. Accessibility tree parsing, no hardcoded selectors.</p></div></div>
+    <div class="cmd-item reveal"><div><code>/repurpose</code></div><div><p><strong>Cross-platform adapt.</strong> LinkedIn → Twitter thread. Blog → carousel. Any format to any format.</p></div></div>
+    <div class="cmd-item reveal"><div><code>/audit</code></div><div><p><strong>Profile check.</strong> Scores each section of your profile. A/B/C/D grade with improvement recommendations.</p></div></div>
+    <div class="cmd-item reveal"><div><code>/index-check</code></div><div><p><strong>System integrity.</strong> Validates all cross-references, file paths, and index consistency.</p></div></div>
+  </div>
+</section>
+
+<section id="platforms">
+  <h2 class="reveal">13 Platforms</h2>
+  <p class="subtitle reveal">Post, schedule, and track analytics across all major social media platforms.</p>
+  <div class="platforms">
+    <div class="platform reveal">LinkedIn</div>
+    <div class="platform reveal">Twitter / X</div>
+    <div class="platform reveal">Facebook</div>
+    <div class="platform reveal">Instagram</div>
+    <div class="platform reveal">TikTok</div>
+    <div class="platform reveal">YouTube</div>
+    <div class="platform reveal">Reddit</div>
+    <div class="platform reveal">Pinterest</div>
+    <div class="platform reveal">Threads</div>
+    <div class="platform reveal">Bluesky</div>
+    <div class="platform reveal">Mastodon</div>
+    <div class="platform reveal">Discord</div>
+    <div class="platform reveal">Dribbble</div>
+  </div>
+</section>
+
+<section id="access">
+  <h2 class="reveal">4 Ways to Access</h2>
+  <p class="subtitle reveal">Same backend, same posts, same analytics — four different interfaces.</p>
+  <div class="access">
+    <div class="access-card reveal">
+      <span class="emoji">💻</span>
+      <h3>Terminal</h3>
+      <p>Claude Code with slash commands. Full AI-powered content creation and management.</p>
+    </div>
+    <div class="access-card reveal">
+      <span class="emoji">📱</span>
+      <h3>Mobile App</h3>
+      <p>Claude Remote Control. Scan QR, get full session on your phone.</p>
+    </div>
+    <div class="access-card reveal">
+      <span class="emoji">💬</span>
+      <h3>Chat Bot</h3>
+      <p>Telegram, Slack, Discord, WhatsApp. Message the bot to post and check analytics.</p>
+    </div>
+    <div class="access-card reveal">
+      <span class="emoji">🌐</span>
+      <h3>Dashboard</h3>
+      <p>Visual calendar, drag-drop scheduling, analytics charts at localhost:4200.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="brand">10x Social Media</div>
+  <p>Developed by <a href="https://10x.in">team 10x.in</a></p>
+  <p style="margin-top:.5rem"><a href="https://github.com/10x-Anit/10x-Social-Media">GitHub</a></p>
+</footer>
+
+<script>
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
