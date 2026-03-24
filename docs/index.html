@@ -30,11 +30,10 @@ nav .links a:hover{color:var(--text)}
 /* Hero */
 .hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:10rem 2rem 4rem;position:relative}
 .hero-title-wrap{min-height:clamp(6rem,16vw,12rem);display:flex;align-items:center;justify-content:center;margin-bottom:1.5rem;position:relative;width:100%}
-.hero h1{font-size:clamp(2.5rem,6vw,4.5rem);font-weight:800;letter-spacing:-.04em;line-height:1.3;color:#c4b5fd;position:absolute;visibility:hidden;transition:none}
-.hero h1.active{visibility:visible;animation:titleIn 1s ease forwards}
-.hero h1.exit{visibility:visible;animation:titleOut 1s ease forwards}
-@keyframes titleIn{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
-@keyframes titleOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-30px)}}
+.hero h1{font-size:clamp(2.5rem,6vw,4.5rem);font-weight:800;letter-spacing:-.04em;line-height:1.3;color:#c4b5fd}
+.hero h1 .typed-text{display:inline}
+.hero h1 .cursor{display:inline-block;width:3px;margin-left:4px;background:var(--accent);animation:cursorBlink .7s step-end infinite}
+@keyframes cursorBlink{0%,100%{opacity:1}50%{opacity:0}}
 .hero-desc{font-size:1.25rem;color:var(--muted);max-width:600px;line-height:1.6;margin-bottom:2.5rem;animation:fadeUp .8s ease .3s both}
 .hero-desc code{background:rgba(99,102,241,.2);color:var(--accent);padding:.15em .4em;border-radius:4px;font-size:.95em}
 
@@ -141,9 +140,7 @@ footer .brand{font-size:1.1rem;font-weight:600;color:var(--text);margin-bottom:.
 
 <section class="hero">
   <div class="hero-title-wrap">
-    <h1 class="active">Your Social Media.<br>AI-Managed.</h1>
-    <h1>Post. Schedule. Track.<br>All From Your Terminal.</h1>
-    <h1>13 Platforms. One Command.<br>Zero Config.</h1>
+    <h1><span class="typed-text" id="typed"></span><span class="cursor" id="cursor">&nbsp;</span></h1>
   </div>
   <p class="hero-desc">Clone the repo. Run <code>/setup</code>. Claude AI builds your entire social media management system — installs everything, connects your accounts, writes in your voice.</p>
   <div class="hero-badges">
@@ -280,20 +277,65 @@ const observer = new IntersectionObserver((entries) => {
 }, { threshold: 0.1 });
 document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
-// Rotating hero titles — 15 seconds each, smooth fade
-const titles = document.querySelectorAll('.hero-title-wrap h1');
-let currentTitle = 0;
-function rotateTitle() {
-  const prev = currentTitle;
-  titles[prev].classList.remove('active');
-  titles[prev].classList.add('exit');
-  currentTitle = (currentTitle + 1) % titles.length;
-  setTimeout(() => {
-    titles[prev].classList.remove('exit');
-    titles[currentTitle].classList.add('active');
-  }, 1000);
+// Typewriter — types char by char, stays 15s, erases, types next
+const typedEl = document.getElementById('typed');
+const cursorEl = document.getElementById('cursor');
+const phrases = [
+  'Your Social Media.\nAI-Managed.',
+  'Post. Schedule. Track.\nAll From Your Terminal.',
+  '13 Platforms. One Command.\nZero Config.'
+];
+let phraseIdx = 0;
+const TYPING_SPEED = 60;
+const ERASING_SPEED = 30;
+const DISPLAY_TIME = 6000;
+
+function typePhrase(text, cb) {
+  let i = 0;
+  typedEl.innerHTML = '';
+  function typeChar() {
+    if (i < text.length) {
+      if (text[i] === '\n') {
+        typedEl.innerHTML += '<br>';
+      } else {
+        typedEl.innerHTML += text[i];
+      }
+      i++;
+      setTimeout(typeChar, TYPING_SPEED);
+    } else if (cb) {
+      setTimeout(cb, DISPLAY_TIME);
+    }
+  }
+  typeChar();
 }
-setInterval(rotateTitle, 15000);
+
+function erasePhrase(cb) {
+  const text = typedEl.innerHTML;
+  function eraseChar() {
+    const current = typedEl.innerHTML;
+    if (current.length > 0) {
+      if (current.endsWith('<br>')) {
+        typedEl.innerHTML = current.slice(0, -4);
+      } else {
+        typedEl.innerHTML = current.slice(0, -1);
+      }
+      setTimeout(eraseChar, ERASING_SPEED);
+    } else if (cb) {
+      setTimeout(cb, 400);
+    }
+  }
+  eraseChar();
+}
+
+function typeLoop() {
+  typePhrase(phrases[phraseIdx], () => {
+    erasePhrase(() => {
+      phraseIdx = (phraseIdx + 1) % phrases.length;
+      typeLoop();
+    });
+  });
+}
+typeLoop();
 
 // Terminal — sequential typing animation
 const termEl = document.getElementById('terminal-anim');
