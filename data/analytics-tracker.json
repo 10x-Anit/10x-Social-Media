@@ -1,0 +1,21 @@
+{
+  "_schema_version": "1.0",
+  "_last_updated": null,
+  "posts": [],
+  "summary": {
+    "last_calculated": null,
+    "total_posts_tracked": 0,
+    "platforms": {},
+    "best_performing": {
+      "by_engagement_rate": null,
+      "by_impressions": null,
+      "by_comments": null
+    },
+    "averages": {
+      "engagement_rate": null,
+      "impressions": null,
+      "likes": null,
+      "comments": null
+    }
+  }
+}

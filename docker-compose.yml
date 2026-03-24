@@ -1,11 +1,12 @@
 ## ============================================================
 ## [F:ROOT.05] 10x Social Media - Docker Compose
 ## ============================================================
-## Services: Postiz App, PostgreSQL, Redis, Temporal
-## Ports exposed to host:
-##   - 4200  → Postiz Web UI (MAIN_URL)
-##   - 3084  → Postiz MCP Server (for Claude Code)
-##   - 8080  → Temporal UI (workflow monitoring)
+## Services: Postiz App + PostgreSQL + Redis (3 containers only)
+## Temporal runs on Temporal Cloud (no self-hosted containers)
+## Auth handled by Composio (no platform developer apps needed)
+##
+## Ports exposed:
+##   - 4200  → Postiz Web UI
 ##
 ## Usage:
 ##   docker compose up -d
@@ -17,6 +18,7 @@
 ##   2. Update MAIN_URL, FRONTEND_URL, NEXT_PUBLIC_BACKEND_URL
 ##   3. Put a reverse proxy (Nginx/Caddy) in front with SSL
 ##   4. docker compose up -d
+##   5. Skills & commands work unchanged
 ## ============================================================
 
 services:
@@ -30,11 +32,15 @@ services:
       DATABASE_URL: postgresql://postiz:postiz_secret@postiz-postgres:5432/postiz
       REDIS_URL: redis://postiz-redis:6379
       BACKEND_INTERNAL_URL: http://localhost:3000
-      TEMPORAL_ADDRESS: postiz-temporal:7233
       IS_GENERAL: "true"
       STORAGE_PROVIDER: local
       UPLOAD_DIRECTORY: /uploads
       NEXT_PUBLIC_UPLOAD_DIRECTORY: /uploads
+      ## ── Temporal Cloud connection ──
+      TEMPORAL_ADDRESS: ${TEMPORAL_ADDRESS}
+      TEMPORAL_NAMESPACE: ${TEMPORAL_NAMESPACE:-default}
+      TEMPORAL_TLS: "true"
+      TEMPORAL_API_KEY: ${TEMPORAL_API_KEY}
     ports:
       - "${POSTIZ_PORT:-4200}:5000"
     volumes:
@@ -45,8 +51,6 @@ services:
         condition: service_healthy
       postiz-redis:
         condition: service_healthy
-      postiz-temporal:
-        condition: service_started
     networks:
       - postiz-network
 
@@ -81,38 +85,6 @@ services:
       retries: 5
     volumes:
       - redis-data:/data
-    networks:
-      - postiz-network
-
-  # ── Temporal (workflow engine) ──────────────────────────────
-  postiz-temporal:
-    image: temporalio/auto-setup:latest
-    container_name: postiz-temporal
-    restart: unless-stopped
-    environment:
-      DB: postgres12
-      DB_PORT: 5432
-      POSTGRES_USER: postiz
-      POSTGRES_PWD: postiz_secret
-      POSTGRES_SEEDS: postiz-postgres
-    depends_on:
-      postiz-postgres:
-        condition: service_healthy
-    networks:
-      - postiz-network
-
-  # ── Temporal UI (optional monitoring) ───────────────────────
-  postiz-temporal-ui:
-    image: temporalio/ui:latest
-    container_name: postiz-temporal-ui
-    restart: unless-stopped
-    environment:
-      TEMPORAL_ADDRESS: postiz-temporal:7233
-      TEMPORAL_CORS_ORIGINS: http://localhost:8080
-    ports:
-      - "${TEMPORAL_UI_PORT:-8080}:8080"
-    depends_on:
-      - postiz-temporal
     networks:
       - postiz-network
 

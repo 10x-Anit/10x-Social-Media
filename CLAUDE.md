@@ -40,7 +40,17 @@ Supports: LinkedIn, Twitter/X, Facebook, Instagram, TikTok, YouTube, Reddit, Pin
 | /browse-social | Playwright browser session | [F:CMD.05] |
 | /repurpose | Reformat content cross-platform | [F:CMD.06] |
 | /audit | Profile completeness audit | [F:CMD.07] |
+| /track-analytics | Capture + record post metrics over time | [F:CMD.09] |
 | /index-check | Validate index integrity | [F:CMD.08] |
+
+## Browser Automation
+Read `skills/browser-automation.md` [F:SKILL.05] before ANY Playwright interaction.
+Uses Snapshot → Act → Verify loop. Works on ANY page. Never hardcode selectors.
+
+## Analytics Tracking
+Per-post metrics stored in `data/analytics-tracker.json` [F:DATA.01].
+Time-series snapshots: hour 0, day 1, day 7, day 30.
+Read `skills/analytics-tracking.md` [F:SKILL.06] for schema and analysis patterns.
 
 ## Before Any Post
 1. Read `skills/social-voice.md` [F:SKILL.01] for tone

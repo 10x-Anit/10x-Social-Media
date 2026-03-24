@@ -10,7 +10,7 @@ Thumbs.db
 desktop.ini
 
 # Docker volumes (if local)
-data/
+# data/ is tracked (analytics-tracker.json lives there)
 
 # Temp files
 *.tmp

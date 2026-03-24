@@ -15,7 +15,12 @@
       "Bash(docker ps:*)",
       "WebFetch(domain:lobehub.com)",
       "Bash(docker compose:*)",
-      "Bash(gh auth:*)"
+      "Bash(gh auth:*)",
+      "WebFetch(domain:docs.composio.dev)",
+      "WebFetch(domain:composio.dev)",
+      "WebFetch(domain:temporal.io)",
+      "WebFetch(domain:docs.temporal.io)",
+      "Bash(xargs grep:*)"
     ]
   }
 }
