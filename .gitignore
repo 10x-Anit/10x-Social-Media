@@ -19,6 +19,12 @@ desktop.ini
 data/*.csv
 data/*.xlsx
 
+# OpenCode plugin runtime
+opencode-plugin/node_modules/
+opencode-plugin/dist/
+opencode-plugin/.env
+opencode-plugin/.wwebjs_auth/
+
 # Temp files
 *.tmp
 *.bak

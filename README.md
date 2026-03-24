@@ -54,15 +54,41 @@ Pinterest, Threads, Bluesky, Mastodon, Discord, Dribbble
 - [Claude Code](https://claude.ai/claude-code)
 - [Temporal Cloud](https://cloud.temporal.io) account (free credits available)
 
+## Mobile Access
+
+**Claude Mobile App (Remote Control):**
+```bash
+claude remote-control
+# Scan QR code with Claude app → full session on phone
+```
+
+**Chat Bot (Telegram/Slack/Discord/WhatsApp):**
+```bash
+cd opencode-plugin
+npm install
+cp .env.example .env
+# Add your Postiz API key + channel credentials
+npm run dev
+```
+
 ## Architecture
 
 ```
-Claude Code ──→ Skills & Commands
-    │
-    ├── Postiz (Docker) ── dashboard, calendar, OAuth
-    ├── Temporal Cloud ──── reliable scheduling & retries
-    ├── Playwright MCP ──── browser automation for ANY page
-    └── Analytics Tracker ─ per-post metrics over time
+┌─────────────────────────────────────────────────┐
+│                ACCESS LAYER                      │
+│  Claude Code ── terminal (skills & commands)     │
+│  Claude App ─── mobile (Remote Control)          │
+│  Chat Bot ───── Telegram/Slack/Discord/WhatsApp  │
+│  Dashboard ──── browser (localhost:4200)          │
+└──────────────────────┬──────────────────────────┘
+                       │ all hit same backend
+                       ▼
+┌─────────────────────────────────────────────────┐
+│  Postiz (Docker) ── dashboard, calendar, API     │
+│  Temporal Cloud ──── reliable scheduling          │
+│  Playwright MCP ──── browser automation           │
+│  Analytics Tracker ─ per-post metrics over time  │
+└─────────────────────────────────────────────────┘
 ```
 
-See `docs/ARCHITECTURE.md` for the full system diagram.
+See `docs/ARCHITECTURE.md` for details.

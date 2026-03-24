@@ -65,6 +65,11 @@ Time-series snapshots: hour 0 → day 1 → day 7 → day 30.
 Combines Postiz API data + Playwright scraped data + manual entries.
 Read `skills/analytics-tracking.md` [F:SKILL.06] for schema and reports.
 
+## Mobile Access
+- **Claude Remote Control**: `claude remote-control` → scan QR with Claude app → full session on phone
+- **Chat Bot**: `opencode-plugin/` — Telegram, Slack, Discord, WhatsApp bot connecting to same Postiz
+- Both hit the same database — posts from chat bot show in dashboard and vice versa
+
 ## Supported Platforms (13)
 LinkedIn, Twitter/X, Facebook, Instagram, TikTok, YouTube, Reddit,
 Pinterest, Threads, Bluesky, Mastodon, Discord, Dribbble

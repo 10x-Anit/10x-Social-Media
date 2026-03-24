@@ -242,15 +242,50 @@ Give me a topic and I'll create a post for you.
   I can check how they're performing.
   ```
 
-## Phase 8: Summary
+## Phase 8: Mobile Access (Remote Control)
+
+### 8.1 Claude Mobile App
+```
+Want to control this from your phone?
+
+Claude Remote Control lets you use the Claude mobile app to
+run all these commands from anywhere.
+
+To enable:
+1. Run this in your terminal: claude remote-control
+   (or type /remote-control inside Claude Code)
+2. A QR code will appear — scan it with the Claude mobile app
+3. Once connected, you can send /post, /schedule, /analytics
+   right from your phone
+
+Works on iOS and Android.
+```
+
+### 8.2 Chat Bot Access (OpenCode Plugin)
+```
+You can also interact via Telegram, Slack, Discord, or WhatsApp.
+
+The chat bot runs separately — to set it up:
+1. cd opencode-plugin
+2. npm install
+3. cp .env.example .env
+4. Edit .env with your Postiz API key + channel credentials
+5. npm run dev
+
+See opencode-plugin/README.md for channel-specific setup.
+```
+
+## Phase 9: Summary
 
 ```
 ✅ Setup Complete!
 
 Your system:
-  Platform:    http://localhost:4200
+  Dashboard:   http://localhost:4200
   Temporal:    {{namespace}} (cloud scheduling)
   Accounts:    {{list all connected accounts}}
+  Mobile:      Claude Remote Control (scan QR to pair)
+  Chat bot:    opencode-plugin/ (Telegram/Slack/Discord/WhatsApp)
 
 What you can do now:
 
@@ -263,7 +298,9 @@ What you can do now:
   /repurpose       Adapt content across platforms
   /audit           Check your profile completeness
 
-  Or just open http://localhost:4200 for the visual dashboard.
+  Mobile:      claude remote-control (pair with phone)
+  Chat bot:    cd opencode-plugin && npm run dev
+  Dashboard:   http://localhost:4200
 
 Say /post to create your first post!
 ```
