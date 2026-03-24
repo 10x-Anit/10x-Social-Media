@@ -8,6 +8,14 @@
 Before executing ANY slash command, run these checks SILENTLY.
 If anything fails, guide the user to fix it — never show raw errors.
 
+### Check 0: System initialized?
+```bash
+cat .setup-complete 2>/dev/null
+```
+- If file does NOT exist → "This system hasn't been set up yet. Run /setup first."
+  Redirect to /setup. Do NOT proceed with any other command.
+- If file exists → continue with checks below
+
 ## Check Matrix — Which commands need what
 
 | Check | /post | /draft | /schedule | /analytics | /track | /browse | /repurpose | /audit | /setup |

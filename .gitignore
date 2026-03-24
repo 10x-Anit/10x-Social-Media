@@ -1,6 +1,9 @@
 # Secrets
 .env
 
+# Setup marker (user-specific, created by /setup)
+.setup-complete
+
 # Node
 node_modules/
 

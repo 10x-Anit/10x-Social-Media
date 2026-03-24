@@ -1,339 +1,448 @@
-# /setup — Complete automated setup for new user
-<!-- [F:CMD.10] -->
+# /setup — Complete automated bootstrapper
+<!-- [F:CMD.10] /setup — Full system installer and configurator -->
+<!-- Depends: ALL -->
+<!-- MCPs: postiz, composio -->
 <!-- Features: ALL -->
 
-You are the installer. The user just cloned this repo and you need to build
-their entire local system from scratch. They should NOT manually edit any files.
-You ask questions, they answer, you create everything.
+## Role
+You are the system installer. Build the user's entire environment from scratch.
+Run each step as a command, verify it worked, then move to the next.
+The user should NEVER manually edit files, install software, or run commands.
+You do everything. They just answer questions and grant permissions.
 
 ## IMPORTANT BEHAVIOR
-- Ask ONE question at a time, wait for answer
-- Create files yourself — never tell the user to edit files manually
-- If something fails, diagnose and fix it — don't dump errors
-- Remember: the user may not be technical at all
-- This system works on **Windows, macOS, and Linux**
+- Run ONE command at a time, verify output, then proceed
+- Ask user permission before installing any software
+- Create all files yourself — never tell user to edit manually
+- If something fails, diagnose and retry with a different approach
+- The user may not be technical at all — explain in plain language
+- Works on **Windows, macOS, and Linux**
 
-## Phase 1: Prerequisites Check
+## Phase 0: Check if already initialized
+
+Check for the initialization marker file:
+```bash
+cat .setup-complete 2>/dev/null
+```
+
+### If `.setup-complete` EXISTS:
+```
+This system was already set up on {{date from file}}.
+
+What would you like to do?
+1. Run full setup again (reconfigure everything)
+2. Add/change social media accounts
+3. Update credentials (API keys)
+4. Check system health
+```
+- If 1 → continue with Phase 1
+- If 2 → skip to Phase 5
+- If 3 → skip to Phase 2
+- If 4 → run scripts/health-check.sh and report
+
+### If `.setup-complete` does NOT exist:
+```
+Welcome to 10x Social Media!
+
+I'm going to set up everything for you. This includes:
+• Installing any missing software (Docker, Node.js)
+• Starting the platform services
+• Creating your account
+• Connecting your social media
+• Personalizing your content style
+
+This takes about 10-15 minutes. Ready?
+```
+Wait for user to confirm, then proceed.
+
+## Phase 1: System Dependencies
 
 ### 1.0 Detect OS
-Detect the operating system silently. Adapt commands accordingly:
-- **Windows**: use `docker compose` (not `docker-compose`), paths use `/` in bash
-- **macOS**: use `docker compose`, may need Rosetta for ARM Macs
-- **Linux**: use `docker compose` or `docker-compose` (check which exists)
+```bash
+uname -s 2>/dev/null || echo "Windows"
+```
+Store result. Adapt all subsequent commands:
+- **Darwin** = macOS
+- **Linux** = Linux
+- **MINGW/MSYS/Windows** = Windows
 
 ### 1.1 Docker
+
+**Check:**
+```bash
+docker --version 2>/dev/null
+```
+
+**If NOT installed — ask permission and install:**
+```
+Docker is required but not installed on your system.
+I can install it for you. Shall I proceed?
+```
+
+If user says yes, install based on OS:
+
+**Windows:**
+```bash
+winget install Docker.DockerDesktop
+```
+If winget not available:
+```
+Please download Docker Desktop from:
+https://docker.com/products/docker-desktop
+
+Install it, restart your computer if asked, then run /setup again.
+```
+
+**macOS:**
+```bash
+brew install --cask docker
+```
+If brew not available:
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+brew install --cask docker
+```
+If user declines brew:
+```
+Please download Docker Desktop from:
+https://docker.com/products/docker-desktop
+```
+
+**Linux (Ubuntu/Debian):**
+```bash
+sudo apt-get update && sudo apt-get install -y docker.io docker-compose-plugin
+sudo systemctl start docker
+sudo usermod -aG docker $USER
+```
+Then tell user: "You may need to log out and back in for Docker permissions."
+
+**Linux (other distros):**
+```
+Please install Docker Engine for your distribution:
+https://docs.docker.com/engine/install/
+```
+
+**After install — verify:**
 ```bash
 docker --version
 ```
-- If NOT installed:
-  - **Windows/macOS**: "Install Docker Desktop from https://docker.com/products/docker-desktop"
-  - **Linux**: "Install Docker Engine: https://docs.docker.com/engine/install/"
-- If installed but not running:
-  - **Windows/macOS**: "Start Docker Desktop from your applications"
-  - **Linux**: "Start Docker with: `sudo systemctl start docker`"
-- If running → continue
+If still fails → "Docker installation didn't work. Please install manually and run /setup again."
 
-Check which compose command works:
+### 1.2 Docker running?
 ```bash
-docker compose version 2>/dev/null || docker-compose version 2>/dev/null
+docker info >/dev/null 2>&1
 ```
-Use whichever succeeds for all subsequent commands.
+If not running:
+- **Windows/macOS**: "Please start Docker Desktop from your applications. Tell me when it's running."
+- **Linux**: Try `sudo systemctl start docker`, then re-check.
 
-### 1.2 Node.js
+### 1.3 Detect compose command
 ```bash
-node --version
+docker compose version 2>/dev/null && echo "COMPOSE=docker compose"
+docker-compose version 2>/dev/null && echo "COMPOSE=docker-compose"
 ```
-- If NOT installed → "Install Node.js from https://nodejs.org (LTS version)"
-- Minimum version: 18+
-- If installed → continue
+Use whichever works. Store for all subsequent commands.
+
+### 1.4 Node.js
+
+**Check:**
+```bash
+node --version 2>/dev/null
+```
+
+**If NOT installed — ask permission and install:**
+```
+Node.js is required but not installed.
+I can install it for you. Shall I proceed?
+```
+
+**Windows:**
+```bash
+winget install OpenJS.NodeJS.LTS
+```
+
+**macOS:**
+```bash
+brew install node@20
+```
+
+**Linux:**
+```bash
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt-get install -y nodejs
+```
+
+**After install — verify:**
+```bash
+node --version && npm --version
+```
+Minimum: Node 18+. If older → "Your Node.js is too old. Updating..."
+
+### 1.5 npx available?
+```bash
+npx --version 2>/dev/null
+```
+If not → `npm install -g npx`
 
 ## Phase 2: Create .env File
 
-### 2.1 Check if .env exists
-- If .env already exists → "I found an existing .env file. Want to
-  reconfigure from scratch or keep your current settings?"
-- If .env does NOT exist → copy from config/.env.example
-
-### 2.2 Generate JWT Secret
-Generate automatically — try in order (cross-platform):
+### 2.1 Check existing
 ```bash
-openssl rand -base64 32                              # Linux/macOS/Windows with Git Bash
-python3 -c "import secrets; print(secrets.token_urlsafe(32))"  # Any OS with Python
-python -c "import secrets; print(secrets.token_urlsafe(32))"   # Windows Python
-node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"  # Any OS with Node
+test -f .env && echo "EXISTS" || echo "MISSING"
 ```
-Write to .env as JWT_SECRET — don't ask the user for this.
+- If EXISTS → "Found existing .env. Reconfigure from scratch or keep current?"
+- If MISSING → copy from template:
+  ```bash
+  cp config/.env.example .env
+  ```
 
-### 2.3 Ask for Temporal Cloud credentials
+### 2.2 Generate JWT Secret (silent — don't ask user)
+Try in order:
+```bash
+openssl rand -base64 32
 ```
-Do you have a Temporal Cloud account?
-
-Temporal Cloud handles reliable scheduling — it makes sure your
-scheduled posts go out even if your computer restarts.
-
-→ If YES: "Please go to cloud.temporal.io and give me:
-   1. Your namespace name (looks like: prod.xxxxx or something.xxxxx)
-   2. Your API key (generate one in Settings → API Keys)"
-
-→ If NO: "You can sign up at cloud.temporal.io — they give you
-   $1,000 in free credits to start. Want to continue without
-   scheduling for now?" (If yes, leave TEMPORAL vars as placeholders)
+Fallback:
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 ```
+Write result to .env as JWT_SECRET.
 
-Write to .env:
-- TEMPORAL_ADDRESS=<namespace>.tmprl.cloud:7233
-- TEMPORAL_NAMESPACE=<namespace>
-- TEMPORAL_API_KEY=<their key>
+### 2.3 Base URLs
+Ask: "Will you run this locally or on a remote server?"
+- LOCAL (default) → write:
+  ```
+  POSTIZ_BASE_URL=http://localhost:4200
+  POSTIZ_API_URL=http://localhost:4200/api
+  MAIN_URL=http://localhost:4200
+  FRONTEND_URL=http://localhost:4200
+  NEXT_PUBLIC_BACKEND_URL=http://localhost:4200/api
+  ```
+- SERVER → ask for domain, derive all URLs
 
-### 2.4 Set base URLs
-Ask: "Will you use this locally or on a server?"
-- If LOCAL (default):
-  - POSTIZ_BASE_URL=http://localhost:4200
-  - POSTIZ_API_URL=http://localhost:4200/api
-  - MAIN_URL=http://localhost:4200
-  - FRONTEND_URL=http://localhost:4200
-  - NEXT_PUBLIC_BACKEND_URL=http://localhost:4200/api
-- If SERVER: ask for domain, derive all URLs from it:
-  - POSTIZ_BASE_URL=https://{domain}
-  - POSTIZ_API_URL=https://{domain}/api
-  - MAIN_URL=https://{domain}
-  - FRONTEND_URL=https://{domain}
-  - NEXT_PUBLIC_BACKEND_URL=https://{domain}/api
+### 2.4 Temporal Cloud
+```
+Do you have a Temporal Cloud account for scheduling?
 
-IMPORTANT: POSTIZ_API_URL must end with /api (not /api/public/v1).
-The Postiz CLI appends the rest of the path automatically.
+Temporal ensures scheduled posts go out reliably.
+Without it, you can still post immediately but scheduling won't work.
 
-### 2.5 Write the complete .env
-Read config/.env.example as template, fill in all values, write to .env.
-Leave social media platform keys empty — those get filled via Composio or dashboard.
+→ Yes: paste namespace and API key
+→ No: sign up at cloud.temporal.io ($1,000 free credits)
+→ Skip for now: continue without scheduling
+```
+Write TEMPORAL_ADDRESS, TEMPORAL_NAMESPACE, TEMPORAL_API_KEY to .env.
+
+### 2.5 Composio
+```
+Do you have a Composio API key?
+
+Composio lets you connect social media accounts with one click.
+Without it, you'll need developer credentials for each platform.
+
+→ Yes: paste it
+→ No: sign up free at composio.dev → Dashboard → API Keys
+→ Skip: connect accounts manually in the dashboard
+```
+Write COMPOSIO_API_KEY to .env.
 
 ## Phase 3: Start Docker Services
 
-### 3.1 Start the stack
+### 3.1 Pull and start
 ```bash
-cd "<project directory>"
 docker compose up -d
 ```
-- Show progress: "Starting Postiz platform... this may take a few minutes
-  on first run (downloading container images)."
-- Wait for containers to be healthy
-- Check: `docker ps` — verify postiz-app, postiz-postgres, postiz-redis
+Tell user: "Starting platform services... first run downloads container images (~1-2 GB). This may take a few minutes."
+
+Monitor with:
+```bash
+docker compose ps
+```
+Wait until all 3 containers are running + healthy.
 
 ### 3.2 Wait for backend
-- Wait 30 seconds for Postiz backend to initialize
-- Check backend logs for "Backend is running on: http://localhost:3000"
-- If NOT starting → check logs, diagnose, and fix
-  (common issue: Temporal connection — if fails, suggest skipping Temporal
-  for now and using self-hosted Temporal as fallback)
+```bash
+sleep 30
+docker exec postiz-app sh -c "cat /root/.pm2/logs/backend-out.log 2>/dev/null" | tail -3
+```
+Look for "Backend is running on: http://localhost:3000"
+
+If not running after 60s:
+- Check error logs
+- Common fix: Temporal connection issue → restart container
+- "Having trouble starting. Let me diagnose..."
 
 ### 3.3 Verify
-- Confirm Postiz is accessible at the configured URL
-- "The platform is running at http://localhost:4200"
+```bash
+curl -s -o /dev/null -w "%{http_code}" http://localhost:4200/
+```
+Expect 200 or 307. Confirm: "Platform is running at http://localhost:4200"
 
-## Phase 4: Postiz Account Setup
+## Phase 4: Postiz Account
 
 ### 4.1 Create account
 ```
-Now let's create your account:
-
-1. Open http://localhost:4200 in your browser
-2. You'll see a registration page
-3. Enter your email, password, and company name
-4. Click "Create Account"
-
-Tell me when you've created your account.
+Open http://localhost:4200 in your browser.
+Create your account with your email and a password.
+Tell me when done.
 ```
 
 ### 4.2 Get API Key
 ```
-Great! Now let's get your API key:
-
-1. In the Postiz dashboard, click on Settings (gear icon)
-2. Go to "Developers" section
-3. You'll see your Public API key
-4. Copy it and paste it here
+In the Postiz dashboard:
+1. Click Settings (gear icon)
+2. Go to "Developers"
+3. Copy the Public API key
+4. Paste it here
 ```
-- When they paste it: write to .env as POSTIZ_API_KEY
-- Restart postiz container to pick up new env: `docker compose restart postiz`
-- Verify by running: `POSTIZ_API_KEY=<key> npx postiz integrations:list`
-- "API key is working."
+Write to .env as POSTIZ_API_KEY and POSTIZ_API_URL.
+Verify:
+```bash
+POSTIZ_API_KEY=<key> POSTIZ_API_URL=http://localhost:4200/api npx -y postiz integrations:list
+```
+If works → "API key verified."
+If 401 → "Key didn't work. Please double-check in Settings → Developers."
 
 ## Phase 5: Connect Social Media Accounts
 
-### 5.1 Composio API Key
-```
-To connect your social media accounts, we use Composio.
-It handles all the OAuth for you — just click a link and authorize.
-No developer apps needed.
+### 5.1 With Composio (if key set)
+For each platform user selects:
+1. Use Composio MCP to generate auth link
+2. "Click this link to connect {{platform}}: {{url}}"
+3. Verify connection
 
-Do you have a Composio API key?
-```
-- If YES → paste it, write to .env as COMPOSIO_API_KEY
-- If NO → "Sign up free at composio.dev, go to Dashboard → API Keys, copy the key and paste it here."
-- Write to .env, restart not needed (Composio runs via MCP, reads env directly)
+### 5.2 Without Composio (manual)
+Guide through dashboard: Channels → Add Channel → platform → OAuth flow.
 
-### 5.2 Platform selection
-```
-Which platforms do you want to connect?
-
- • LinkedIn (personal profile or company page)
- • Twitter / X
- • Facebook (page)
- • Instagram (business account)
- • TikTok
- • YouTube
- • Reddit
- • Pinterest
- • Threads
- • Bluesky
- • Mastodon
- • Discord
- • Dribbble
-
-Tell me which ones.
-```
-
-### 5.3 Connect via Composio (primary method)
-For each selected platform:
-1. Use Composio MCP to initiate a connection for the platform
-2. Composio generates an authorization URL
-3. Tell user: "Click this link to connect {{platform}}: {{url}}"
-4. User clicks → authorizes in browser → connection stored in Composio
-5. Verify: use Composio MCP to check connection status
-6. "{{platform}} connected successfully!"
-
-Note: Twitter/X may require the user's own API keys (Composio dropped
-managed auth for X in Feb 2026). If so, fall back to manual setup:
-ask for X_API_KEY and X_API_SECRET.
-
-### 5.4 Also connect in Postiz dashboard (for scheduling/calendar)
-```
-Your accounts are connected via Composio for posting.
-For the visual calendar and scheduling, also connect them in the dashboard:
-
-1. Open http://localhost:4200
-2. Go to Channels → Add Channel → {{platform}}
-3. Click Connect — follow the login flow
-4. This lets you use the drag-drop calendar and see analytics in the UI
-```
-
-Note: If user already has developer credentials (client_id/secret) from
-their own apps, they can use those in Postiz directly. Composio and Postiz
-connections work independently — both are available.
-
-### 5.5 Verify connections
-- Check Composio connections via MCP
-- Run `postiz integrations:list` for Postiz connections
-- Show user their full list of connected accounts
-
-### 5.6 Multiple accounts
+### 5.3 Multiple accounts
 ```
 Want to connect more accounts for {{platform}}?
-For example, a personal LinkedIn AND a company page?
-Just click the connect link again for each account.
+(e.g., personal LinkedIn AND company page)
 ```
 
-## Phase 6: Personalize
-
-### 6.1 Voice and tone
+### 5.4 Verify all connections
+```bash
+POSTIZ_API_KEY=<key> POSTIZ_API_URL=http://localhost:4200/api npx -y postiz integrations:list
 ```
-Let's set up your posting style so I write content that sounds like you.
+Show connected accounts.
+
+## Phase 6: Install OpenCode Plugin
+
+### 6.1 Install dependencies
+```bash
+cd opencode-plugin && npm install
+```
+
+### 6.2 Build
+```bash
+cd opencode-plugin && npm run build
+```
+
+### 6.3 Create plugin .env
+Copy opencode-plugin/.env.example to opencode-plugin/.env.
+Fill in POSTIZ_BASE_URL and POSTIZ_API_KEY from main .env.
+
+### 6.4 Ask about chat channels
+```
+Want to set up chat bot access? (Telegram/Slack/Discord/WhatsApp)
+This lets you manage social media from your phone via chat.
+```
+For each channel selected, guide through token setup.
+
+## Phase 7: Personalize
+
+### 7.1 Voice and tone
+```
+Let's set up your posting style.
 
 1. What industry are you in?
-2. Describe your brand tone in a few words (professional, casual, witty, bold...)
-3. Any words or phrases you ALWAYS want to use?
-4. Any words or phrases you NEVER want to use?
-5. What topics do you mainly post about?
+2. Describe your tone (professional, casual, witty, bold...)
+3. Words/phrases you ALWAYS use?
+4. Words/phrases you NEVER use?
+5. Main topics you post about?
 ```
-- Update skills/social-voice.md with their answers (or create a personal override)
+Update skills/social-voice.md [F:SKILL.01] with answers.
 
-### 6.2 Posting schedule
+### 7.2 Posting schedule
 ```
-What's your ideal posting schedule?
-- Which days do you typically post?
-- What times work best? (e.g., "Tuesday and Thursday mornings")
+Your ideal posting schedule?
+- Which days?
+- What times?
 - How many posts per week?
 ```
-- Update skills/content-calendar.md with their preferences
+Update skills/content-calendar.md [F:SKILL.03] with answers.
 
-## Phase 7: Test Run
+## Phase 8: Test Run
 
-### 7.1 Test draft
+### 8.1 Test draft
 ```
-Let's test everything with a quick draft.
-Give me a topic and I'll create a post for you.
-(This is just a draft — I won't publish anything.)
+Let's test with a quick draft. Give me a topic.
+(Just a draft — I won't publish anything.)
 ```
-- Create a draft using their voice rules and connected platform
-- Show the preview
-- If they like it, offer to publish or schedule
+Create draft, show preview. If approved, offer to publish.
 
-### 7.2 Test analytics (if posts exist)
-- If they have existing posts on connected platforms:
-  ```
-  Want me to pull analytics for your recent posts?
-  I can check how they're performing.
-  ```
-
-## Phase 8: Mobile Access (Remote Control)
-
-### 8.1 Claude Mobile App
+### 8.2 Test analytics
+If posts exist on connected platforms:
 ```
-Want to control this from your phone?
-
-Claude Remote Control lets you use the Claude mobile app to
-run all these commands from anywhere.
-
-To enable:
-1. Run this in your terminal: claude remote-control
-   (or type /remote-control inside Claude Code)
-2. A QR code will appear — scan it with the Claude mobile app
-3. Once connected, you can send /post, /schedule, /analytics
-   right from your phone
-
-Works on iOS and Android.
+Want me to check how your recent posts are performing?
 ```
 
-### 8.2 Chat Bot Access (OpenCode Plugin)
+## Phase 9: Mobile Access
+
+### 9.1 Claude Remote Control
 ```
-You can also interact via Telegram, Slack, Discord, or WhatsApp.
-
-The chat bot runs separately — to set it up:
-1. cd opencode-plugin
-2. npm install
-3. cp .env.example .env
-4. Edit .env with your Postiz API key + channel credentials
-5. npm run dev
-
-See opencode-plugin/README.md for channel-specific setup.
+Want to use this from your phone?
+Run: claude remote-control
+Scan the QR code with the Claude mobile app.
 ```
 
-## Phase 9: Summary
+### 9.2 Chat bot
+If OpenCode plugin configured in Phase 6:
+```
+Start the chat bot:
+cd opencode-plugin && npm run dev
+```
 
+## Phase 10: Mark Complete
+
+### 10.1 Create initialization marker
+Write `.setup-complete` file:
+```
+setup_date: {{ISO-8601 timestamp}}
+os: {{detected OS}}
+node_version: {{node --version}}
+docker_version: {{docker --version}}
+postiz_url: {{POSTIZ_BASE_URL}}
+temporal: {{configured or skipped}}
+composio: {{configured or skipped}}
+accounts: {{list of connected platforms}}
+opencode_plugin: {{installed or skipped}}
+chat_channels: {{list or none}}
+```
+
+### 10.2 Add to .gitignore
+Append `.setup-complete` to .gitignore (it's user-specific, not shared).
+
+### 10.3 Summary
 ```
 ✅ Setup Complete!
 
 Your system:
-  Dashboard:   http://localhost:4200
-  Temporal:    {{namespace}} (cloud scheduling)
-  Accounts:    {{list all connected accounts}}
-  Mobile:      Claude Remote Control (scan QR to pair)
-  Chat bot:    opencode-plugin/ (Telegram/Slack/Discord/WhatsApp)
+  Dashboard:   {{POSTIZ_BASE_URL}}
+  Temporal:    {{namespace or "not configured"}}
+  Composio:    {{configured or "not configured"}}
+  Accounts:    {{list}}
+  Chat bot:    {{channels or "not configured"}}
+  Mobile:      claude remote-control
 
-What you can do now:
-
+Commands:
   /post            Write and publish a post
   /draft           Draft without publishing
-  /schedule        Schedule posts for the future
-  /analytics       Check post performance
-  /track-analytics Capture detailed metrics over time
-  /browse-social   Open any site in browser
-  /repurpose       Adapt content across platforms
-  /audit           Check your profile completeness
-
-  Mobile:      claude remote-control (pair with phone)
-  Chat bot:    cd opencode-plugin && npm run dev
-  Dashboard:   http://localhost:4200
+  /schedule        Schedule for later
+  /analytics       Check performance
+  /track-analytics Capture metrics over time
+  /browse-social   Browser automation
+  /repurpose       Adapt across platforms
+  /audit           Profile audit
 
 Say /post to create your first post!
 ```
