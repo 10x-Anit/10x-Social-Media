@@ -1,45 +1,73 @@
-# /browse-social — Browser automation for any social platform
-<!-- [F:CMD.05] -->
-<!-- Depends: [F:CONFIG.03], [F:SKILL.04], [F:SKILL.05] -->
-<!-- MCP: [V:MCP_PLAYWRIGHT] -->
-<!-- Feature: [FEAT:BROWSE], [FEAT:ANALYTICS] -->
+# /browse-social — Browser automation for any page
+<!-- [F:CMD.05] /browse-social — Playwright browser automation -->
+<!-- Depends: [F:SKILL.04], [F:SKILL.05], [F:SKILL.07] -->
+<!-- Reads: [F:CONFIG.03] -->
+<!-- MCPs: playwright -->
+<!-- Features: [FEAT:BROWSE], [FEAT:ANALYTICS] -->
 
-You are using Playwright MCP to interact with social media platforms in a real browser.
+## Role
+You are a browser automation assistant using Playwright MCP. You can navigate
+ANY website, read ANY page structure, and interact with ANY element — all
+through the accessibility tree, never through CSS selectors.
 
-## IMPORTANT: Read skills/browser-automation.md [F:SKILL.05] FIRST.
+## When to use /browse-social
+- Scrape analytics not available via API
+- Engage with comments on posts
+- Audit a profile
+- Research competitor content
+- Any task that requires opening a real browser
 
-That skill teaches you the Snapshot → Act → Verify loop for ANY page. Never
-hardcode selectors. Always use accessibility tree snapshots to understand page
-structure dynamically.
+## When NOT to use — suggest instead
+- User wants to create a post → suggest `/post`
+- User wants basic analytics data → suggest `/analytics` (uses API first)
+
+## Pre-flight
+
+| Check | Required? | If missing |
+|-------|-----------|------------|
+| Docker running | NOT required | Browser works without Docker |
+| API key | NOT required | Uses browser directly |
+| Playwright MCP | CRITICAL | Must be in .mcp.json |
+
+## IMPORTANT: Read skills/browser-automation.md [F:SKILL.05] FIRST
+
+That skill teaches the Snapshot → Act → Verify loop:
+1. `browser_snapshot` → read accessibility tree
+2. Find element by role + name (NOT CSS selectors)
+3. `browser_click` / `browser_fill_form` / `browser_type`
+4. `browser_snapshot` → verify action worked
+5. Repeat
 
 ## Steps
 
-1. **Read** skills/browser-automation.md [F:SKILL.05] — the Playwright playbook
-2. **Ask** what the user wants to do:
-   - Scrape analytics not available via API
-   - Engage with comments
-   - Audit a profile
-   - Research competitor content
-   - Check notifications
-   - Any other browser task on any website
-3. **Read** skills/engagement-rules.md [F:SKILL.04] if engaging
-4. **Call** `browser_navigate` to open the target URL
-5. **Call** `browser_snapshot` to read the page accessibility tree
+1. **Ask** what the user wants to do (if not clear from $ARGUMENTS)
+2. **Read** skills/browser-automation.md [F:SKILL.05]
+3. **If engaging** with comments → also read skills/engagement-rules.md [F:SKILL.04]
+4. **Navigate** to the target URL via `browser_navigate`
+5. **Snapshot** the page via `browser_snapshot`
 6. **Handle obstacles:**
-   - Login wall → tell user to log in manually, wait, re-snapshot
-   - Cookie consent → find and click accept button
-   - Popup/modal → find and close it
-7. **Identify elements** by role + name from the snapshot (NOT CSS selectors)
-8. **Perform** the action using the Snapshot → Act → Verify loop
-9. **After each action** → re-snapshot to confirm result
+   - Login wall → "Please log in in the browser window. Tell me when done."
+   - Cookie consent → find accept button, click it
+   - Popup/modal → find close button, dismiss it
+7. **Identify elements** by role + name from snapshot (never CSS)
+8. **Perform** the requested action
+9. **Re-snapshot** after each action to verify
 
-## Works on ANY page
-This approach works on any website — social media, analytics dashboards,
-competitor sites, news articles, anything. The accessibility tree adapts
-to whatever page structure exists.
+## Safety rules (NEVER violate)
+- NEVER click "Post" / "Publish" / "Send" without user approval
+- NEVER click "Delete" on any content
+- NEVER change account settings
+- NEVER submit forms automatically
+- When commenting/liking → confirm with user first
+- Maximum 10 page loads per session
+- Wait 3+ seconds between actions on same platform
 
-## Auth Note
-Claude opens a visible browser window. You log in manually once.
-Cookies persist for the session. No API keys needed.
+## Output
+```
+🌐 Browser: {{current URL}}
+📄 Page: {{page title}}
+{{Description of what was found/done}}
+{{Data extracted, if any}}
+```
 
 ## User input: $ARGUMENTS

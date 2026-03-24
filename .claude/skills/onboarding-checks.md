@@ -1,62 +1,73 @@
 # Onboarding Checks — Run Before Any Command
-<!-- [F:SKILL.07] -->
+<!-- [F:SKILL.07] Onboarding pre-flight checks -->
 <!-- Read by: ALL commands -->
 <!-- Features: ALL -->
 
 ## Pre-Flight Check
 
-Before executing ANY slash command (/post, /schedule, /analytics, etc.),
-run these checks silently. If anything fails, guide the user to fix it
-instead of throwing an error.
+Before executing ANY slash command, run these checks SILENTLY.
+If anything fails, guide the user to fix it — never show raw errors.
 
-### Check 1: Docker Running?
+## Check Matrix — Which commands need what
+
+| Check | /post | /draft | /schedule | /analytics | /track | /browse | /repurpose | /audit | /setup |
+|-------|-------|--------|-----------|------------|--------|---------|------------|--------|--------|
+| Docker running | ABORT | skip | ABORT | ABORT | ABORT | skip | skip | skip | ABORT |
+| API key set | ABORT | skip | ABORT | ABORT | ABORT | skip | skip | skip | guide |
+| Accounts exist | ABORT | skip | ABORT | warn | ABORT | skip | skip | skip | guide |
+| Target account | ask | skip | ask | skip | skip | skip | ask* | skip | skip |
+
+- **ABORT** = stop command, tell user how to fix
+- **warn** = tell user but continue (can show tracker data without accounts)
+- **ask** = prompt user to select account
+- **skip** = check not needed for this command
+- **guide** = part of setup flow, guide through it
+- **ask*** = only if publishing the adapted content
+
+## Check 1: Docker Running?
 ```bash
 docker ps | grep postiz-app
 ```
-- If NOT running → "The platform isn't running. Let me help you start it.
-  Run: docker compose up -d"
-- If running → continue
+- If NOT running → "The platform isn't running. Start it with: `docker compose up -d`"
+- If running → continue silently
 
-### Check 2: API Key Set?
-- Check if POSTIZ_API_KEY environment variable is set and not placeholder
-- If missing → "I need your Postiz API key first. Run /setup to get started."
+## Check 2: API Key Set?
+- Check if POSTIZ_API_KEY is set and not "REPLACE_AFTER_FIRST_LOGIN"
+- Also check POSTIZ_API_URL is set (should be http://localhost:4200/api)
+- If missing → "Run /setup to configure your credentials."
 
-### Check 3: Accounts Connected?
+## Check 3: Accounts Connected?
 - Run `postiz integrations:list`
-- If empty → "You haven't connected any social media accounts yet.
-  Open http://localhost:4200 and connect your accounts in the dashboard.
-  Or run /setup for a guided walkthrough."
-- If connected → continue, and show which accounts are available
+- If empty → "No social accounts connected. Open http://localhost:4200 to add platforms, or run /setup."
+- If connected → continue silently
 
-### Check 4: Target Account Clear?
-- If the command involves posting/scheduling and user hasn't specified which account:
-  - List connected accounts: "Which account should I post to?"
-  - Let user pick by name (e.g., "company LinkedIn" or "personal Twitter")
-  - Remember their choice for the session
+## Check 4: Target Account Selection
 
-## Account Selection (for multi-account users)
-
-When a user has multiple accounts for the same platform, ALWAYS ask which one:
+When a user has multiple accounts for the same platform:
 ```
-You have 3 LinkedIn accounts connected:
-  1. John's Profile (personal)
-  2. Acme Corp (company page)
-  3. Acme Engineering Blog
+You have {{count}} {{platform}} accounts:
+  1. {{name1}} ({{type1}})
+  2. {{name2}} ({{type2}})
 
-Which one should I post to? (or say "all" for all of them)
+Which one? (or "all" for all of them)
 ```
 
-Store the mapping of friendly names → integration IDs from
-config/linkedin-channels.json [F:CONFIG.04].
+### Account selection persistence
+- After user picks an account, remember it for the rest of the session
+- If user runs a DIFFERENT platform command, ask again
+- If user says "different account" or "switch", clear selection and re-ask
+- Store as: selected_account = { platform, integrationId, friendlyName }
 
-## Error Messages — Always Helpful
+## Error Messages — Always Helpful, Never Raw
 
-Never show raw errors. Always explain what went wrong and how to fix it:
-
-| Error | User sees |
+| Situation | What user sees |
 |---|---|
-| API key invalid | "Your API key isn't working. Go to Postiz dashboard → Settings → Developers to get a new one." |
-| Platform not connected | "You haven't connected {{platform}} yet. Open http://localhost:4200 and add it." |
-| Rate limited | "We've hit the API rate limit (30 requests/hour). Try again in a few minutes." |
-| Post failed | "The post couldn't be published. Let me check why... [diagnose]" |
-| Docker down | "The platform services aren't running. Run: docker compose up -d" |
+| Docker not running | "Platform services aren't running. Start with: `docker compose up -d`" |
+| API key missing | "API key not configured. Run /setup or paste your key from Settings → Developers." |
+| API key invalid (401) | "API key isn't working. Get a new one from Postiz dashboard → Settings → Developers." |
+| Platform not connected | "{{platform}} isn't connected yet. Open http://localhost:4200 and add it in Channels." |
+| Rate limited (429) | "API rate limit reached (30/hour). Try again in a few minutes." |
+| Post failed | "Post couldn't be published: {{reason}}. Draft saved so you don't lose your work." |
+| Temporal not configured | "Scheduling requires Temporal Cloud. Run /setup to configure, or publish immediately with /post." |
+| Composio not configured | "For one-click account connections, set up Composio in /setup. Or connect manually in the dashboard." |
+| Network error | "Can't reach the platform. Check if Docker is running: `docker compose up -d`" |
