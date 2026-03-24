@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/Anit/.claude/**)",
+      "Read(//c/Users/Anit/AppData/Roaming/Claude/**)",
+      "Read(//c/Users/Anit/.claude/projects/**)",
+      "WebFetch(domain:docs.postiz.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:www.npmjs.com)",
+      "WebSearch",
+      "WebFetch(domain:gist.github.com)",
+      "Bash(openssl rand:*)",
+      "Bash(python3 -c \"import secrets; print\\(secrets.token_urlsafe\\(32\\)\\)\")",
+      "Bash(python -c \"import secrets; print\\(secrets.token_urlsafe\\(32\\)\\)\")",
+      "Bash(docker ps:*)",
+      "WebFetch(domain:lobehub.com)",
+      "Bash(docker compose:*)",
+      "Bash(gh auth:*)"
+    ]
+  }
+}

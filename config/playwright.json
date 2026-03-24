@@ -1,0 +1,34 @@
+{
+  "_comment": "[F:CONFIG.03] Playwright MCP connection documentation",
+  "_index": {
+    "id": "F:CONFIG.03",
+    "depends_on": [],
+    "features": ["FEAT:BROWSE", "FEAT:AUDIT", "FEAT:ANALYTICS"]
+  },
+
+  "mcp_server": {
+    "name": "playwright",
+    "command": "npx",
+    "args": ["@playwright/mcp@latest"],
+    "note": "Runs locally via npx, not inside Docker"
+  },
+
+  "capabilities": {
+    "navigate": "Open any URL in a real browser",
+    "snapshot": "Get accessibility tree of current page",
+    "click": "Click elements by accessibility label",
+    "fill": "Fill form fields",
+    "screenshot": "Take page screenshots",
+    "evaluate": "Run JavaScript in page context"
+  },
+
+  "use_cases": [
+    "Scrape per-post analytics not available via API",
+    "Engage with comments on any platform",
+    "Audit social media profiles",
+    "Handle OAuth login flows",
+    "Scrape competitor posts and engagement data"
+  ],
+
+  "auth_note": "Claude opens a visible browser. You log in manually once. Cookies persist for the session."
+}

@@ -1,0 +1,12 @@
+{
+  "_comment": "[F:CONFIG.04] Channel/Integration ID cache - populated by /analytics or sync-channels.sh",
+  "_index": {
+    "id": "F:CONFIG.04",
+    "depends_on": ["V:POSTIZ_API_KEY"],
+    "features": ["FEAT:POST", "FEAT:SCHEDULE", "FEAT:ANALYTICS"]
+  },
+
+  "integrations": [],
+
+  "_instructions": "Run the /analytics command or scripts/sync-channels.sh after connecting platforms in Postiz dashboard. This file will be populated with integration IDs like: { 'id': 'abc123', 'platform': 'linkedin', 'name': 'My LinkedIn' }"
+}

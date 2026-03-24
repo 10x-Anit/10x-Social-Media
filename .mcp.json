@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "postiz": {
+      "command": "npx",
+      "args": ["-y", "postiz"],
+      "env": {
+        "POSTIZ_API_KEY": "${POSTIZ_API_KEY}"
+      }
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest"]
+    }
+  }
+}

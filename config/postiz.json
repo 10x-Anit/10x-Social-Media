@@ -1,0 +1,49 @@
+{
+  "_comment": "[F:CONFIG.02] Postiz MCP connection documentation",
+  "_index": {
+    "id": "F:CONFIG.02",
+    "depends_on": ["V:POSTIZ_API_KEY", "V:POSTIZ_MCP_URL", "V:POSTIZ_BASE_URL"],
+    "features": ["FEAT:POST", "FEAT:SCHEDULE", "FEAT:ANALYTICS"]
+  },
+
+  "mcp_server": {
+    "name": "postiz",
+    "transport": "sse",
+    "local_url": "http://localhost:3084/sse",
+    "remote_url_pattern": "https://{your-domain}:3084/sse",
+    "note": "URL comes from POSTIZ_MCP_URL in .env"
+  },
+
+  "api": {
+    "base_path": "/api/public/v1",
+    "rate_limit": "30 requests/hour",
+    "auth": "Bearer token via POSTIZ_API_KEY"
+  },
+
+  "supported_platforms": [
+    "linkedin",
+    "twitter",
+    "facebook",
+    "instagram",
+    "tiktok",
+    "youtube",
+    "reddit",
+    "pinterest",
+    "threads",
+    "bluesky",
+    "mastodon",
+    "discord",
+    "dribbble"
+  ],
+
+  "mcp_tools": {
+    "integrationList": "List all connected social accounts",
+    "integrationSchema": "Get post schema for a platform",
+    "schedulePostTool": "Create and schedule a post",
+    "triggerTool": "Trigger platform-specific actions",
+    "generateImageTool": "Generate images for posts",
+    "generateVideoOptions": "List video generation options",
+    "videoFunctionTool": "Execute video functions",
+    "generateVideoTool": "Generate video content"
+  }
+}

@@ -1,0 +1,127 @@
+## ============================================================
+## [F:ROOT.05] 10x Social Media - Docker Compose
+## ============================================================
+## Services: Postiz App, PostgreSQL, Redis, Temporal
+## Ports exposed to host:
+##   - 4200  → Postiz Web UI (MAIN_URL)
+##   - 3084  → Postiz MCP Server (for Claude Code)
+##   - 8080  → Temporal UI (workflow monitoring)
+##
+## Usage:
+##   docker compose up -d
+##   docker compose down
+##   docker compose logs -f postiz
+##
+## Migration to remote server:
+##   1. Change POSTIZ_BASE_URL in .env to your domain
+##   2. Update MAIN_URL, FRONTEND_URL, NEXT_PUBLIC_BACKEND_URL
+##   3. Put a reverse proxy (Nginx/Caddy) in front with SSL
+##   4. docker compose up -d
+## ============================================================
+
+services:
+  # ── Postiz Application ──────────────────────────────────────
+  postiz:
+    image: ghcr.io/gitroomhq/postiz-app:latest
+    container_name: postiz-app
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://postiz:postiz_secret@postiz-postgres:5432/postiz
+      REDIS_URL: redis://postiz-redis:6379
+      BACKEND_INTERNAL_URL: http://localhost:3000
+      TEMPORAL_ADDRESS: postiz-temporal:7233
+      IS_GENERAL: "true"
+      STORAGE_PROVIDER: local
+      UPLOAD_DIRECTORY: /uploads
+      NEXT_PUBLIC_UPLOAD_DIRECTORY: /uploads
+    ports:
+      - "${POSTIZ_PORT:-4200}:5000"
+    volumes:
+      - postiz-config:/config
+      - postiz-uploads:/uploads
+    depends_on:
+      postiz-postgres:
+        condition: service_healthy
+      postiz-redis:
+        condition: service_healthy
+      postiz-temporal:
+        condition: service_started
+    networks:
+      - postiz-network
+
+  # ── PostgreSQL ──────────────────────────────────────────────
+  postiz-postgres:
+    image: postgres:17-alpine
+    container_name: postiz-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postiz
+      POSTGRES_PASSWORD: postiz_secret
+      POSTGRES_DB: postiz
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postiz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - postiz-network
+
+  # ── Redis ───────────────────────────────────────────────────
+  postiz-redis:
+    image: redis:7.2-alpine
+    container_name: postiz-redis
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - redis-data:/data
+    networks:
+      - postiz-network
+
+  # ── Temporal (workflow engine) ──────────────────────────────
+  postiz-temporal:
+    image: temporalio/auto-setup:latest
+    container_name: postiz-temporal
+    restart: unless-stopped
+    environment:
+      DB: postgres12
+      DB_PORT: 5432
+      POSTGRES_USER: postiz
+      POSTGRES_PWD: postiz_secret
+      POSTGRES_SEEDS: postiz-postgres
+    depends_on:
+      postiz-postgres:
+        condition: service_healthy
+    networks:
+      - postiz-network
+
+  # ── Temporal UI (optional monitoring) ───────────────────────
+  postiz-temporal-ui:
+    image: temporalio/ui:latest
+    container_name: postiz-temporal-ui
+    restart: unless-stopped
+    environment:
+      TEMPORAL_ADDRESS: postiz-temporal:7233
+      TEMPORAL_CORS_ORIGINS: http://localhost:8080
+    ports:
+      - "${TEMPORAL_UI_PORT:-8080}:8080"
+    depends_on:
+      - postiz-temporal
+    networks:
+      - postiz-network
+
+volumes:
+  postgres-data:
+  redis-data:
+  postiz-config:
+  postiz-uploads:
+
+networks:
+  postiz-network:
+    driver: bridge

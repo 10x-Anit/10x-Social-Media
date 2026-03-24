@@ -1,0 +1,17 @@
+# Secrets
+.env
+
+# Node
+node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Docker volumes (if local)
+data/
+
+# Temp files
+*.tmp
+*.bak
