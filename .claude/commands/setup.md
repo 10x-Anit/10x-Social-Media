@@ -1,7 +1,7 @@
 # /setup — Complete automated bootstrapper
 <!-- [F:CMD.10] /setup — Full system installer and configurator -->
 <!-- Depends: ALL -->
-<!-- MCPs: postiz, composio -->
+<!-- MCPs: none required (setup generates .mcp.json — MCP tools available after restart) -->
 <!-- Features: ALL -->
 
 ## Role
@@ -32,13 +32,15 @@ This system was already set up on {{date from file}}.
 What would you like to do?
 1. Run full setup again (reconfigure everything)
 2. Add/change social media accounts
-3. Update credentials (API keys)
+3. Update credentials (API keys + rewire MCP)
 4. Check system health
+5. Repair MCP config only (fix .mcp.json)
 ```
 - If 1 → continue with Phase 1
 - If 2 → skip to Phase 5
-- If 3 → skip to Phase 2
+- If 3 → skip to Phase 2 (also runs Phase 4B to rewire .mcp.json)
 - If 4 → run scripts/health-check.sh and report
+- If 5 → read API keys from existing .env, detect OS, run Phase 4B only
 
 ### If `.setup-complete` does NOT exist:
 ```
@@ -302,16 +304,120 @@ POSTIZ_API_KEY=<key> POSTIZ_API_URL=http://localhost:4200/api npx -y postiz inte
 If works → "API key verified."
 If 401 → "Key didn't work. Please double-check in Settings → Developers."
 
+## Phase 4B: Generate .mcp.json (MCP Server Config)
+
+`.mcp.json` tells Claude Code how to connect to Postiz, Composio, and Playwright MCP servers.
+**This file is NOT in the git repo** — it's user-specific (contains API keys) and OS-specific (command wrappers).
+Each user's `/setup` generates it fresh.
+
+### 4B.0 Why this matters
+Claude Code MCP config does **NOT** read `.env` files. The `${VAR}` syntax silently fails.
+All API keys must be **inlined as literal strings** in `.mcp.json`.
+See `config/.mcp.json.example` for the reference template.
+
+### 4B.1 Detect OS for command wrapper
+Reuse the OS detected in Phase 1.0:
+- **Windows** (MINGW/MSYS/Windows) → `"command": "cmd"`, `"args": ["/c", "npx", "-y", ...]`
+- **macOS / Linux** → `"command": "npx"`, `"args": ["-y", ...]`
+
+### 4B.2 Build and write .mcp.json
+Use the **Write tool** to create `.mcp.json` in the project root with actual values collected so far.
+
+**Windows:**
+```json
+{
+  "mcpServers": {
+    "postiz": {
+      "command": "cmd",
+      "args": ["/c", "npx", "-y", "postiz"],
+      "env": {
+        "POSTIZ_API_KEY": "{{actual key from Phase 4.2}}",
+        "POSTIZ_API_URL": "{{actual URL from Phase 2.3, e.g. http://localhost:4200/api}}"
+      }
+    },
+    "composio": {
+      "command": "cmd",
+      "args": ["/c", "npx", "-y", "@composio/mcp"],
+      "env": {
+        "COMPOSIO_API_KEY": "{{actual key from Phase 2.5}}"
+      }
+    },
+    "playwright": {
+      "command": "cmd",
+      "args": ["/c", "npx", "-y", "@playwright/mcp@latest"]
+    }
+  }
+}
+```
+
+**macOS / Linux:**
+```json
+{
+  "mcpServers": {
+    "postiz": {
+      "command": "npx",
+      "args": ["-y", "postiz"],
+      "env": {
+        "POSTIZ_API_KEY": "{{actual key from Phase 4.2}}",
+        "POSTIZ_API_URL": "{{actual URL from Phase 2.3}}"
+      }
+    },
+    "composio": {
+      "command": "npx",
+      "args": ["-y", "@composio/mcp"],
+      "env": {
+        "COMPOSIO_API_KEY": "{{actual key from Phase 2.5}}"
+      }
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest"]
+    }
+  }
+}
+```
+
+### 4B.3 Rules
+- **ALWAYS inline actual values** — NEVER use `${VAR}` syntax
+- If Composio was **skipped** → omit the `composio` server entry entirely (don't leave broken config)
+- If the user **re-runs setup** and `.mcp.json` already exists → overwrite it with fresh values
+- After writing, verify:
+  ```bash
+  cat .mcp.json
+  ```
+
+### 4B.4 Notify user about restart
+```
+MCP servers configured! To activate them, you'll need to restart Claude Code
+after setup finishes. I'll remind you at the end.
+
+For now, we'll continue setup using the dashboard and CLI commands.
+```
+
+**Do NOT stop setup here.** Continue to Phase 5. MCP tools are not needed for the remaining phases.
+
 ## Phase 5: Connect Social Media Accounts
 
-### 5.1 With Composio (if key set)
-For each platform user selects:
-1. Use Composio MCP to generate auth link
-2. "Click this link to connect {{platform}}: {{url}}"
-3. Verify connection
+**IMPORTANT:** MCP tools (Postiz MCP, Composio MCP) are NOT available during first-time setup
+because `.mcp.json` was just created and Claude Code hasn't restarted yet.
+Use the **dashboard** and **CLI commands** for this phase.
 
-### 5.2 Without Composio (manual)
-Guide through dashboard: Channels → Add Channel → platform → OAuth flow.
+### 5.1 Ask which platforms
+```
+Which social media platforms do you want to connect?
+(LinkedIn, Twitter/X, Facebook, Instagram, TikTok, YouTube, Reddit,
+Pinterest, Threads, Bluesky, Mastodon, Discord, Dribbble)
+```
+
+### 5.2 Connect via dashboard (primary method during first-time setup)
+For each platform:
+```
+1. Open http://localhost:4200 in your browser
+2. Go to Channels → Add Channel
+3. Select {{platform}}
+4. Complete the OAuth authorization
+5. Tell me when done
+```
 
 ### 5.3 Multiple accounts
 ```
@@ -320,10 +426,15 @@ Want to connect more accounts for {{platform}}?
 ```
 
 ### 5.4 Verify all connections
+Use the CLI directly (not MCP — it's not active yet):
 ```bash
-POSTIZ_API_KEY=<key> POSTIZ_API_URL=http://localhost:4200/api npx -y postiz integrations:list
+POSTIZ_API_KEY={{key}} POSTIZ_API_URL={{url}} npx -y postiz integrations:list
 ```
 Show connected accounts.
+
+### 5.5 Note for future use
+After setup + restart, Composio MCP tools will be available for one-click account
+connections. Users can add more accounts later via `/setup` option 2.
 
 ## Phase 6: Install OpenAnalyst Plugin
 
@@ -424,7 +535,7 @@ Append `.setup-complete` to .gitignore (it's user-specific, not shared).
 
 ### 10.3 Summary
 ```
-✅ Setup Complete!
+Setup Complete!
 
 Your system:
   Dashboard:   {{POSTIZ_BASE_URL}}
@@ -434,7 +545,10 @@ Your system:
   Chat bot:    {{channels or "not configured"}}
   Mobile:      claude remote-control
 
-Commands:
+IMPORTANT: Restart Claude Code now to activate MCP servers.
+After restart, all commands will work with full MCP integration.
+
+Commands (available after restart):
   /post            Write and publish a post
   /draft           Draft without publishing
   /schedule        Schedule for later
@@ -444,7 +558,7 @@ Commands:
   /repurpose       Adapt across platforms
   /audit           Profile audit
 
-Say /post to create your first post!
+Restart Claude Code, then say /post to create your first post!
 ```
 
 ## User input: $ARGUMENTS

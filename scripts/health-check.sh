@@ -80,8 +80,33 @@ if [ -f "$PROJECT_DIR/.mcp.json" ]; then
       echo "   [WARN] $server MCP not found in .mcp.json"
     fi
   done
+
+  # Check for unresolved ${VAR} placeholders (Claude Code cannot resolve these)
+  if grep -qE '\$\{[A-Z_]+\}' "$PROJECT_DIR/.mcp.json" 2>/dev/null; then
+    echo "   [FAIL] .mcp.json contains \${VAR} placeholders — Claude Code cannot resolve these"
+    echo "         Run /setup to wire actual values into .mcp.json"
+  else
+    echo "   [OK] No unresolved placeholders"
+  fi
+
+  # Check for SETUP_SKIPPED or WILL_BE markers
+  if grep -qE 'SETUP_SKIPPED|WILL_BE' "$PROJECT_DIR/.mcp.json" 2>/dev/null; then
+    echo "   [WARN] Some MCP keys still need configuration — run /setup"
+  fi
+
+  # Check Windows cmd /c wrapper (only on Windows)
+  case "$(uname -s 2>/dev/null)" in
+    MINGW*|MSYS*|CYGWIN*)
+      if grep -q '"npx"' "$PROJECT_DIR/.mcp.json" 2>/dev/null && ! grep -q '"cmd"' "$PROJECT_DIR/.mcp.json" 2>/dev/null; then
+        echo "   [FAIL] Windows detected but .mcp.json uses bare 'npx' — needs 'cmd /c' wrapper"
+        echo "         Run /setup to fix"
+      else
+        echo "   [OK] Windows cmd /c wrapper present"
+      fi
+      ;;
+  esac
 else
-  echo "   [FAIL] .mcp.json not found"
+  echo "   [FAIL] .mcp.json not found — run /setup"
 fi
 
 # 6. Check OpenAnalyst plugin

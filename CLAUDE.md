@@ -28,6 +28,11 @@ Always be helpful. Never show raw errors. Explain what's wrong and how to fix it
 - **composio**: `npx @composio/mcp` — one-click OAuth, platform API tools (post, analytics)
 - **playwright**: `npx @playwright/mcp@latest` — browser automation for ANY page
 
+**`.mcp.json` is NOT in git** — it's generated per-user by `/setup` (Phase 4B).
+It contains user-specific API keys and OS-specific command wrappers (`cmd /c npx` on Windows, bare `npx` on Mac/Linux).
+Template for reference: `config/.mcp.json.example`
+If `.mcp.json` is missing or broken, run `/setup` option 3 to regenerate it.
+
 ## Composio (Account Connections)
 Composio handles OAuth for social platforms — users click a link to authorize instead
 of creating developer apps. Use Composio MCP tools to:

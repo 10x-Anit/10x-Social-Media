@@ -1,0 +1,53 @@
+{
+  "_comment": "DO NOT COPY THIS FILE DIRECTLY. Run /setup in Claude Code — it generates .mcp.json automatically with your API keys and the correct command wrapper for your OS.",
+
+  "_windows": {
+    "_note": "On Windows, commands use: cmd /c npx",
+    "mcpServers": {
+      "postiz": {
+        "command": "cmd",
+        "args": ["/c", "npx", "-y", "postiz"],
+        "env": {
+          "POSTIZ_API_KEY": "YOUR_API_KEY_HERE",
+          "POSTIZ_API_URL": "http://localhost:4200/api"
+        }
+      },
+      "composio": {
+        "command": "cmd",
+        "args": ["/c", "npx", "-y", "@composio/mcp"],
+        "env": {
+          "COMPOSIO_API_KEY": "YOUR_COMPOSIO_KEY_HERE"
+        }
+      },
+      "playwright": {
+        "command": "cmd",
+        "args": ["/c", "npx", "-y", "@playwright/mcp@latest"]
+      }
+    }
+  },
+
+  "_macOS_linux": {
+    "_note": "On macOS/Linux, commands use bare npx",
+    "mcpServers": {
+      "postiz": {
+        "command": "npx",
+        "args": ["-y", "postiz"],
+        "env": {
+          "POSTIZ_API_KEY": "YOUR_API_KEY_HERE",
+          "POSTIZ_API_URL": "http://localhost:4200/api"
+        }
+      },
+      "composio": {
+        "command": "npx",
+        "args": ["-y", "@composio/mcp"],
+        "env": {
+          "COMPOSIO_API_KEY": "YOUR_COMPOSIO_KEY_HERE"
+        }
+      },
+      "playwright": {
+        "command": "npx",
+        "args": ["-y", "@playwright/mcp@latest"]
+      }
+    }
+  }
+}

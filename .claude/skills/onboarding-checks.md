@@ -22,6 +22,7 @@ cat .setup-complete 2>/dev/null
 |-------|-------|--------|-----------|------------|--------|---------|------------|--------|--------|
 | Docker running | ABORT | skip | ABORT | ABORT | ABORT | skip | skip | skip | ABORT |
 | API key set | ABORT | skip | ABORT | ABORT | ABORT | skip | skip | skip | guide |
+| MCP wired | ABORT | skip | ABORT | ABORT | ABORT | skip | skip | skip | guide |
 | Accounts exist | ABORT | skip | ABORT | warn | ABORT | skip | skip | skip | guide |
 | Target account | ask | skip | ask | skip | skip | skip | ask* | skip | skip |
 
@@ -43,6 +44,19 @@ docker ps | grep postiz-app
 - Check if POSTIZ_API_KEY is set and not "REPLACE_AFTER_FIRST_LOGIN"
 - Also check POSTIZ_API_URL is set (should be http://localhost:4200/api)
 - If missing → "Run /setup to configure your credentials."
+
+## Check 2B: MCP Servers Wired?
+Read `.mcp.json` and verify:
+1. File exists
+2. `postiz` server entry has **actual** POSTIZ_API_KEY value (not `${POSTIZ_API_KEY}` or `WILL_BE_SET_DURING_SETUP` or `SETUP_SKIPPED`)
+3. `postiz` server entry has **actual** POSTIZ_API_URL value (not a `${VAR}` placeholder)
+4. On Windows: commands use `"cmd"` with `["/c", "npx", ...]` args (not bare `"npx"`)
+
+If `.mcp.json` is missing or has placeholders:
+→ "MCP servers aren't wired correctly. Run /setup to fix, or I can repair it now."
+If user says fix now → read API key from `.env`, detect OS, and rewrite `.mcp.json` with actual values (same logic as setup Phase 4B).
+
+**Why this matters:** Claude Code MCP config does NOT read `.env` files. `${VAR}` placeholders silently fail, causing all Postiz MCP tools to be unavailable.
 
 ## Check 3: Accounts Connected?
 - Run `postiz integrations:list`
